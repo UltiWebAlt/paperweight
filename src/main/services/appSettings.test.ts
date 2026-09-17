@@ -25,6 +25,8 @@ describe("buildAppSettings", () => {
 
     expect(settings).toEqual({
       providerType: "none",
+      gmailIncludeSpam: false,
+      gmailIncludeTrash: false,
       autoLaunch: false,
       launchMinimized: false,
       userName: "",
@@ -45,6 +47,8 @@ describe("buildAppSettings", () => {
 
     expect(settings).toEqual({
       providerType: "none",
+      gmailIncludeSpam: false,
+      gmailIncludeTrash: false,
       autoLaunch: false,
       launchMinimized: false,
       userName: "",
@@ -72,6 +76,8 @@ describe("buildAppSettings", () => {
 
     expect(settings).toEqual({
       providerType: "gmail",
+      gmailIncludeSpam: false,
+      gmailIncludeTrash: false,
       autoLaunch: true,
       launchMinimized: false,
       userName: "Alex",

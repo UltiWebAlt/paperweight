@@ -7,6 +7,8 @@ import { BODY_TEXT_MAX_LENGTH } from "@shared/config";
 import { headerRecord } from "@shared/utils";
 import { syncLog, authLog } from "../utils/log";
 import { GmailApiError, gmailRequest } from "./gmail-request";
+import { gmailListParams, excludedGmailLabels } from "./gmail-scope";
+import { getSetting } from "../services/settings";
 
 // Injected at build time via electron-vite define.
 // Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET env vars before building.
@@ -350,6 +352,12 @@ async function parseGmailMessage(
 export function createGmailProvider(
   analysisOptions?: AnalyzeOptions,
 ): EmailProvider {
+  // Scope is fixed for this provider's lifetime; saving settings restarts sync.
+  const scope = {
+    includeSpam: getSetting("gmailIncludeSpam") === "true",
+    includeTrash: getSetting("gmailIncludeTrash") === "true",
+  };
+  const excludedLabels = excludedGmailLabels(scope);
   return {
     type: "gmail",
 
@@ -370,15 +378,7 @@ export function createGmailProvider(
 
     async getMessageCount(since: Date, until?: Date): Promise<number | undefined> {
       try {
-        // Use messages.list with maxResults=1 to get resultSizeEstimate
-        // for the same query scope the sync will use (excludes spam/trash).
-        // Profile's messagesTotal includes spam/trash so it overestimates.
-        const afterEpoch = Math.floor(since.getTime() / 1000);
-        const params: Record<string, string> = { maxResults: "1" };
-        const qParts: string[] = [];
-        if (afterEpoch > 0) qParts.push(`after:${afterEpoch}`);
-        if (until) qParts.push(`before:${Math.floor(until.getTime() / 1000)}`);
-        if (qParts.length > 0) params.q = qParts.join(" ");
+        const params = gmailListParams(scope, since, until, 1);
         const result = (await gmailApiFetch("/messages", params)) as {
           resultSizeEstimate?: number;
         };
@@ -394,16 +394,7 @@ export function createGmailProvider(
       pageToken?: string,
       onProgress?: (fetched: number, estimatedTotal?: number) => void
     ): Promise<{ messages: EmailMessage[]; nextPageToken?: string }> {
-      const afterEpoch = Math.floor(since.getTime() / 1000);
-
-      const params: Record<string, string> = {
-        maxResults: "50",
-      };
-      // Build date-range query. after:0 is unreliable so only add when non-zero.
-      const qParts: string[] = [];
-      if (afterEpoch > 0) qParts.push(`after:${afterEpoch}`);
-      if (until) qParts.push(`before:${Math.floor(until.getTime() / 1000)}`);
-      if (qParts.length > 0) params.q = qParts.join(" ");
+      const params = gmailListParams(scope, since, until, 50);
       if (pageToken) {
         params.pageToken = pageToken;
       }
@@ -501,7 +492,7 @@ export function createGmailProvider(
     // historyId is a mailbox-wide version cursor (not a date), so removals of messages of
     // any age are reported, as long as the cursor is within Gmail's retention (~1 week of
     // inactivity → 404 → re-baseline). Adds come from the date-range listMessages() path,
-    // so this consumes removals only: permanent deletions and TRASH/SPAM label additions.
+    // so this consumes removals only: permanent deletions and excluded-folder label additions.
 
     async getRemovalCursor(): Promise<string | undefined> {
       try {
@@ -533,13 +524,13 @@ export function createGmailProvider(
           nextCursor = result.historyId;
 
           // Adds come from the date-range path, so collect removals only: permanent
-          // deletions and messages that gained the TRASH or SPAM label.
+          // deletions and messages moved into an excluded folder.
           for (const entry of result.history ?? []) {
             for (const item of entry.messagesDeleted ?? []) {
               removedIds.add(item.message.id);
             }
             for (const item of entry.labelsAdded ?? []) {
-              if (item.labelIds?.some((l) => l === "TRASH" || l === "SPAM")) {
+              if (item.labelIds?.some((l) => excludedLabels.includes(l))) {
                 removedIds.add(item.message.id);
               }
             }

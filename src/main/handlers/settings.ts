@@ -2,7 +2,10 @@ import { ipcMain, shell } from "electron";
 import { IPC } from "@shared/ipc";
 import { isLicenseKey, isString } from "@shared/validation";
 import { activateLicense, getLicenseStatus, deleteLicense, applyAutoLaunch } from "../services/settings";
-import { saveSetting } from "../services/settings";
+import { getSetting, saveSetting } from "../services/settings";
+import { getActiveEmail, loadCredentials } from "../credentials";
+import { stopSync, startAllSyncs } from "../sync-manager";
+import { saveGmailFolderSettings } from "../services/gmailSyncSettings";
 import { getGlobalSetting, saveGlobalSetting } from "../services/globalSettings";
 import { buildAppSettings } from "../services/appSettings";
 import { dataLog } from "../utils/log";
@@ -27,11 +30,30 @@ export function registerSettingsHandlers(): void {
     event.returnValue = buildAppSettings();
   });
 
-  ipcMain.handle(IPC.saveSettings, (_event, settings: unknown) => {
+  ipcMain.handle(IPC.saveSettings, async (_event, settings: unknown) => {
     if (!settings || typeof settings !== "object") {
       throw new Error("Invalid settings");
     }
     const s = settings as Record<string, unknown>;
+    const folderKeys = ["gmailIncludeSpam", "gmailIncludeTrash"] as const;
+    const updateFolders = folderKeys.some((key) => s[key] !== undefined);
+    if (updateFolders) {
+      for (const key of folderKeys) {
+        if (s[key] !== undefined && typeof s[key] !== "boolean") throw new Error(`Invalid ${key}`);
+      }
+      const email = getActiveEmail();
+      if (!email || loadCredentials()?.providerType !== "gmail") throw new Error("Select a Gmail account first");
+      const next = {
+        gmailIncludeSpam: (s.gmailIncludeSpam as boolean | undefined) ?? (getSetting("gmailIncludeSpam") === "true"),
+        gmailIncludeTrash: (s.gmailIncludeTrash as boolean | undefined) ?? (getSetting("gmailIncludeTrash") === "true"),
+      };
+      if (folderKeys.some((key) => next[key] !== (getSetting(key) === "true"))) {
+        await stopSync(email);
+        if (getActiveEmail() !== email) throw new Error("Account changed; save the folder selection again");
+        saveGmailFolderSettings(next);
+        startAllSyncs();
+      }
+    }
     const changedKeys = Object.keys(s).join(", ");
     dataLog.info(`Settings saved: ${changedKeys}`);
 

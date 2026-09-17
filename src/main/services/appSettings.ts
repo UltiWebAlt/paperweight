@@ -13,6 +13,8 @@ export function buildAppSettings(): Settings {
   const colorTheme = getGlobalSetting("colorTheme");
   return {
     providerType: creds?.providerType || "none",
+    gmailIncludeSpam: hasAccount && getSetting("gmailIncludeSpam") === "true",
+    gmailIncludeTrash: hasAccount && getSetting("gmailIncludeTrash") === "true",
     autoLaunch: autoLaunchVal !== undefined ? autoLaunchVal : registered,
     launchMinimized: launchMinimizedVal !== undefined ? launchMinimizedVal : registered,
     userName: hasAccount ? (getSetting("userName") ?? "") : "",

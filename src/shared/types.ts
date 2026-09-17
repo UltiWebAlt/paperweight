@@ -526,6 +526,8 @@ export interface AccountInfo {
 
 export interface Settings {
   providerType: string;
+  gmailIncludeSpam?: boolean;
+  gmailIncludeTrash?: boolean;
   autoLaunch?: boolean;
   launchMinimized?: boolean;
   userName?: string;
