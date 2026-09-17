@@ -3,7 +3,8 @@ import { config } from "dotenv";
 import { defineConfig } from "electron-vite";
 import react from "@vitejs/plugin-react";
 
-config();
+// Local configuration takes precedence over inherited shell/IDE variables.
+config({ path: resolve(__dirname, ".env"), override: true });
 
 export default defineConfig({
   main: {
