@@ -425,7 +425,7 @@ export default function Mail(): JSX.Element {
       vendor,
       methods,
       whitelistTarget: "domain",
-      trashAlso: false,
+      trashAlso: true,
     });
   };
 
@@ -445,7 +445,7 @@ export default function Mail(): JSX.Element {
     setBatch({
       phase: "confirm",
       kind,
-      trashAlso: kind === "spam",
+      trashAlso: kind === "spam" || kind === "unsubscribe",
       current: 0,
       total: 0,
       succeeded: [],
