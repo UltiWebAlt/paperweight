@@ -85,6 +85,13 @@ contribution — no engine knowledge required. See
 [`analysis/src/data/lexicons/README.md`](analysis/src/data/lexicons/README.md)
 for the rules.
 
+### Building for Arch Linux / Manjaro
+
+Run `yarn dist:archlinux` on Linux to build a native pacman package for the host
+architecture. The package is written to `dist/paperweight-<version>-<arch>.pkg.tar.xz`.
+Install it with `sudo pacman -U ./dist/paperweight-<version>-<arch>.pkg.tar.xz`,
+replacing the placeholders with the generated filename.
+
 ### Gmail request pacing
 
 All Gmail REST calls (sync, profile lookup, trash/spam/read actions, and sending)

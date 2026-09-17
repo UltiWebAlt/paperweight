@@ -22,6 +22,7 @@
     "dist": "yarn dist:mac && yarn dist:linux && yarn dist:win",
     "dist:mac": "electron-rebuild -f -w better-sqlite3 && yarn build && electron-builder --mac --publish never",
     "dist:linux": "electron-rebuild -f -w better-sqlite3 && yarn build && electron-builder --linux --publish never",
+    "dist:archlinux": "electron-rebuild -f -w better-sqlite3 && yarn build && electron-builder --linux pacman --publish never",
     "dist:win": "electron-rebuild -f -w better-sqlite3 && yarn build && electron-builder --win --publish never",
     "scripts:stats": "tsx scripts/release-stats.ts",
     "seed:test-account": "cross-env TSX_TSCONFIG_PATH=tsconfig.node.json ELECTRON_RUN_AS_NODE=1 electron --import tsx scripts/seed-test-account.ts",
@@ -92,6 +93,22 @@
       "category": "Utility",
       "maintainer": "wslyvh",
       "icon": "build/icon.png"
+    },
+    "pacman": {
+      "artifactName": "paperweight-${version}-${arch}.pkg.tar.xz",
+      "compression": "xz",
+      "depends": [
+        "gtk3",
+        "nss",
+        "alsa-lib",
+        "libxss",
+        "libxtst",
+        "libnotify",
+        "xdg-utils",
+        "mesa",
+        "libcups",
+        "libsecret"
+      ]
     },
     "toolsets": {
       "appimage": "1.0.2"
