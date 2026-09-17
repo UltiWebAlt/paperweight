@@ -470,7 +470,15 @@ export function isAccountAuthIntent(value: unknown): value is AccountAuthIntent 
     && intent.email.trim() !== "";
 }
 
+export interface AccountHealth {
+  email: string;
+  connection: "syncing" | "error" | "missing" | "ready";
+  lastSyncAt?: number;
+  historyAvailable: boolean;
+}
+
 export interface AccountSummary {
+  label?: string;
   email: string;
   providerType: string;
   registeredAt?: number;

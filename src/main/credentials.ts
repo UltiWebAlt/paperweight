@@ -37,6 +37,7 @@ export interface AccountEntry {
   email: string;
   providerType: string;
   registeredAt?: number;
+  label?: string;
 }
 
 interface AccountRegistry {
@@ -92,12 +93,23 @@ export function registerAccount(email: string, providerType: string, registeredA
   const idx = registry.accounts.findIndex((a) => a.email === email);
   const entry: AccountEntry = { email, providerType, registeredAt };
   if (idx >= 0) {
-    registry.accounts[idx] = entry;
+    registry.accounts[idx] = { ...registry.accounts[idx], ...entry };
   } else {
     registry.accounts.push(entry);
   }
   saveRegistry(registry);
   setActiveEmail(email);
+}
+
+export function setAccountLabel(email: string, label: string): void {
+  if (typeof label !== "string" || label.trim().length > 40) {
+    throw new Error("Account labels must be 40 characters or fewer");
+  }
+  const registry = loadRegistry();
+  const account = registry.accounts.find((entry) => entry.email === email);
+  if (!account) throw new Error("Account not found");
+  account.label = label.trim() || undefined;
+  saveRegistry(registry);
 }
 
 export function removeAccountEntry(email: string): void {

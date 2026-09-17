@@ -136,9 +136,10 @@ const api: ElectronAPI = {
   getActivityLog: (limit, offset) =>
     ipcRenderer.invoke(IPC.getActivityLog, limit, offset),
 
+  setAccountLabel: (email, label) => ipcRenderer.invoke(IPC.setAccountLabel, email, label),
+  getAccountHealth: () => ipcRenderer.invoke(IPC.getAccountHealth),
   listAccounts: () => ipcRenderer.sendSync(IPC.listAccounts),
 
-  addAccount: () => ipcRenderer.invoke(IPC.addAccount),
 
   switchAccount: (email) => ipcRenderer.invoke(IPC.switchAccount, email),
 

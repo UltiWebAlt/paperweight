@@ -265,16 +265,14 @@ async function runRemovalPass(provider: EmailProvider): Promise<void> {
 // The IMAP all-mail switch clears messages (UIDs change namespace), but vendors and
 // action_log survive. Once the re-sync has repopulated messages, re-apply per-message
 // "unsubscribed" status from the action_log. Runs while the flag is set (idempotent);
-// cleared once backfill is complete (historical for licensed, first incremental for free).
+// cleared once historical backfill is complete.
 const REAPPLY_UNSUB_FLAG = "migration:reapply-unsub";
 
-function maybeReapplyUnsubscribed(licensed: boolean): void {
+function maybeReapplyUnsubscribed(): void {
   if (getSetting(REAPPLY_UNSUB_FLAG) !== "1") return;
   reapplyUnsubscribedFromActionLog();
   const syncState = getSyncState();
-  const backfillComplete = licensed
-    ? syncState.historical_done
-    : !!syncState.quick_sync_done_at;
+  const backfillComplete = syncState.historical_done;
   if (backfillComplete) saveSetting(REAPPLY_UNSUB_FLAG, "0");
 }
 
@@ -563,10 +561,10 @@ export async function runSync(licensedOverride?: boolean): Promise<void> {
     // providers with a delta layer (Gmail, Microsoft). No-op for IMAP.
     await runRemovalPass(provider);
 
-    // Phase 2: Historical sync (licensed users only). Full fetch, same as
+    // Phase 2: Historical sync for every account. Full fetch, same as
     // incremental — bodies and findings land for history too. Isolated empty
     // chunks are crossed; three consecutive empty chunks finish the walk.
-    if (licensed) {
+    {
       const syncState = getSyncState();
       if (
         !syncState.historical_done &&
@@ -606,7 +604,7 @@ export async function runSync(licensedOverride?: boolean): Promise<void> {
     enrichVendorCategories();
 
     // Re-derive "unsubscribed" message status after an all-mail migration re-sync.
-    maybeReapplyUnsubscribed(licensed);
+    maybeReapplyUnsubscribed();
     seedProfileEmailsFromCurrentAccount(getDb());
 
     await provider.disconnect();

@@ -1,16 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import makeBlockie from "ethereum-blockies-base64";
-import { HelpCircle, Lock, Moon, Sun } from "lucide-react";
+import { HelpCircle, Moon, Sun } from "lucide-react";
 import {
-  FREE_TIER_SYNC_DAYS,
   type AccountInfo,
+  type AccountHealth,
   type EmailConnection,
-  type LicenseStatus,
   type WhitelistEntry,
 } from "@shared/types";
 import { formatBytes } from "@shared/formatting";
-import { useLicense, useRefreshLicense } from "../context/LicenseContext";
 import {
   ProviderSelect,
   GmailConnect,
@@ -38,13 +36,18 @@ export default function Settings(): JSX.Element {
   const [connection, setConnection] = useState<EmailConnection | null>(null);
   const [autoLaunch, setAutoLaunch] = useState(() => !!window.api.getSettings().autoLaunch);
   const [launchMinimized, setLaunchMinimized] = useState(() => !!window.api.getSettings().launchMinimized);
+  const [gmailFolders, setGmailFolders] = useState(() => {
+    const settings = window.api.getSettings();
+    return {
+      gmailIncludeSpam: !!settings.gmailIncludeSpam,
+      gmailIncludeTrash: !!settings.gmailIncludeTrash,
+    };
+  });
+  const [savedGmailFolders, setSavedGmailFolders] = useState(gmailFolders);
+  const [savingGmailFolders, setSavingGmailFolders] = useState(false);
+  const [gmailFolderError, setGmailFolderError] = useState("");
   const [colorTheme, setColorTheme] = useState<ColorTheme>(readColorTheme);
   const [showResyncModal, setShowResyncModal] = useState(false);
-  const [licenseKey, setLicenseKey] = useState("");
-  const license = useLicense();
-  const refreshLicense = useRefreshLicense();
-  const [licenseLoading, setLicenseLoading] = useState(false);
-  const [licenseError, setLicenseError] = useState("");
   const [showWipeModal, setShowWipeModal] = useState(false);
   const [wipeInProgress, setWipeInProgress] = useState(false);
   const [deletionError, setDeletionError] = useState("");
@@ -58,13 +61,48 @@ export default function Settings(): JSX.Element {
   const [removeAccountEmail, setRemoveAccountEmail] = useState<string | null>(
     null,
   );
+  const [accountError, setAccountError] = useState("");
+  const [editingLabel, setEditingLabel] = useState<string | null>(null);
+  const [labelDraft, setLabelDraft] = useState("");
+  const [savingLabel, setSavingLabel] = useState(false);
+  const [health, setHealth] = useState<AccountHealth[]>([]);
+  const [healthError, setHealthError] = useState("");
+  useEffect(() => {
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const refresh = async () => {
+      try {
+        const next = await window.api.getAccountHealth();
+        if (!cancelled) { setHealth(next); setHealthError(""); }
+      } catch {
+        if (!cancelled) setHealthError("Could not refresh account status. Retrying…");
+      } finally {
+        if (!cancelled) timer = setTimeout(refresh, 10000);
+      }
+    };
+    void refresh();
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [accounts]);
+
+  const saveLabel = async (): Promise<void> => {
+    if (!editingLabel) return;
+    setSavingLabel(true);
+    setAccountError("");
+    try {
+      await window.api.setAccountLabel(editingLabel, labelDraft);
+      window.dispatchEvent(new Event("account-label-changed"));
+      setEditingLabel(null);
+    } catch {
+      setAccountError("Could not save the account label. Please try again.");
+    } finally { setSavingLabel(false); }
+  };
+
   const [removeInProgress, setRemoveInProgress] = useState(false);
   const [switchingEmail, setSwitchingEmail] = useState<string | null>(null);
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
   const [addAccountView, setAddAccountView] =
     useState<AddAccountView>("provider");
   const [addAccountCopyFirst, setAddAccountCopyFirst] = useState(false);
-  const licenseSectionRef = useRef<HTMLDivElement>(null);
 
   const fetchWhitelist = async (): Promise<void> => {
     const entries = await window.api.getWhitelistEntries();
@@ -103,37 +141,24 @@ export default function Settings(): JSX.Element {
     fetchWhitelist();
   };
 
-  const handleActivateLicense = async (): Promise<void> => {
-    const key = licenseKey.trim();
-    if (!key) return;
-    setLicenseLoading(true);
-    setLicenseError("");
-    try {
-      const status = await window.api.activateLicense(key);
-      await refreshLicense();
-      if (!status.active) {
-        setLicenseError("Invalid or expired license key.");
-      } else {
-        setLicenseKey("");
-        window.api.startSync();
-      }
-    } catch (err) {
-      setLicenseError(err instanceof Error ? err.message : "Activation failed");
-    } finally {
-      setLicenseLoading(false);
-    }
-  };
-
-  const handleDeactivateLicense = async (): Promise<void> => {
-    await window.api.deactivateLicense();
-    await refreshLicense();
-  };
-
   const handleResync = async (): Promise<void> => {
     await window.api.resyncData();
     setShowResyncModal(false);
     window.api.startSync();
     window.api.getAccountInfo().then(setAccount);
+  };
+
+  const handleSaveGmailFolders = async (): Promise<void> => {
+    setSavingGmailFolders(true);
+    setGmailFolderError("");
+    try {
+      await window.api.saveSettings(gmailFolders);
+      setSavedGmailFolders(gmailFolders);
+    } catch (error) {
+      setGmailFolderError(error instanceof Error ? error.message : "Could not save folder selection");
+    } finally {
+      setSavingGmailFolders(false);
+    }
   };
 
   const handleWipe = async (): Promise<void> => {
@@ -152,21 +177,18 @@ export default function Settings(): JSX.Element {
   };
 
   const handleSwitchAccount = async (email: string): Promise<void> => {
+    setAccountError("");
     setSwitchingEmail(email);
     try {
       await window.api.switchAccount(email);
       // accountSwitched event triggers App remount
     } catch {
+      setAccountError("Could not switch accounts. Please try again.");
       setSwitchingEmail(null);
     }
   };
 
-  const handleAddAccount = async (): Promise<void> => {
-    const result = await window.api.addAccount();
-    if (result?.blocked && result.reason === "license_required") {
-      licenseSectionRef.current?.scrollIntoView({ behavior: "smooth" });
-      return;
-    }
+  const handleAddAccount = (): void => {
     setAddAccountView("provider");
     setShowAddAccountModal(true);
   };
@@ -200,13 +222,6 @@ export default function Settings(): JSX.Element {
       hour: "numeric",
       minute: "2-digit",
     });
-  };
-
-  const tierLabel = (status: LicenseStatus): string => {
-    if (!status.active) return "Free";
-    if (status.tier === "lifetime") return "Lifetime";
-    if (status.tier === "test") return "Test";
-    return "Licensed";
   };
 
   const connectionHealthy = !!connection;
@@ -250,8 +265,7 @@ export default function Settings(): JSX.Element {
     }
   };
 
-  const actionBusy = switchingEmail !== null || removeInProgress;
-  const needsLicense = !license.active && accounts.length >= 1;
+  const actionBusy = switchingEmail !== null || removeInProgress || savingLabel;
 
   return (
     <div className="space-y-6 max-w-xl">
@@ -292,6 +306,10 @@ export default function Settings(): JSX.Element {
       <div className="card bg-base-200">
         <div className="card-body space-y-3">
           <h3 className="font-semibold">Accounts</h3>
+          <p className="text-sm text-base-content/60">
+            Connect multiple email accounts here. Each account keeps its own mail
+            and settings. Switch accounts to choose which one you are viewing.
+          </p>
           <div className="space-y-2">
             {accounts.map((acc) => (
               <div
@@ -306,8 +324,8 @@ export default function Settings(): JSX.Element {
                   />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium truncate">
-                        {acc.email}
+                      <span className="text-sm font-medium truncate" title={acc.email}>
+                        {acc.label || acc.email}
                       </span>
                       {acc.isActive && (
                         <span className="badge badge-xs badge-soft badge-success shrink-0">
@@ -316,15 +334,29 @@ export default function Settings(): JSX.Element {
                       )}
                     </div>
                     <p className="text-xs text-base-content/50">
+                      {acc.label && <span>{acc.email} · </span>}
                       {formatProvider(acc.providerType)}
                       {acc.registeredAt
                         ? ` · Registered ${formatDate(acc.registeredAt)}`
                         : ""}
                       {` · ${formatBytes(acc.sizeBytes)}`}
                     </p>
+                    <p className="text-xs text-base-content/70" role="status">
+                      {(() => {
+                        const status = health.find((item) => item.email === acc.email);
+                        if (!status) return "Loading account status…";
+                        const text = { syncing: "Syncing…", error: "Sync failed — switch to this account and retry or reconnect", missing: "Reconnect required", ready: "Ready to sync" }[status.connection];
+                        return `${text} · Last sync: ${status.historyAvailable ? formatDateTime(status.lastSyncAt) : "Unavailable"}`;
+                      })()}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
+                  <button className="btn btn-ghost btn-xs" disabled={actionBusy}
+                    aria-label={`Edit label for ${acc.email}`}
+                    onClick={() => { setEditingLabel(acc.email); setLabelDraft(acc.label ?? ""); setAccountError(""); }}>
+                    Label
+                  </button>
                   {!acc.isActive && (
                     <button
                       className="btn btn-ghost btn-xs"
@@ -362,128 +394,43 @@ export default function Settings(): JSX.Element {
             ))}
           </div>
 
+          {healthError && <p className="text-sm text-error" role="alert">{healthError}</p>}
+          {accountError && <p className="text-sm text-error" role="alert">{accountError}</p>}
+          {editingLabel && (
+            <form className="space-y-2" onSubmit={(event) => { event.preventDefault(); void saveLabel(); }}>
+              <label className="text-sm block" htmlFor="account-label">Label for {editingLabel}</label>
+              <input id="account-label" className="input input-bordered input-sm w-full" autoFocus
+                placeholder="Personal or Work" maxLength={40} value={labelDraft} disabled={savingLabel}
+                onChange={(event) => setLabelDraft(event.target.value)} />
+              <p className="text-xs text-base-content/60">Optional. Leave blank to show the email address.</p>
+              <button className="btn btn-primary btn-sm" disabled={actionBusy}>{savingLabel ? "Saving…" : "Save label"}</button>
+              <button type="button" className="btn btn-ghost btn-sm" disabled={savingLabel} onClick={() => setEditingLabel(null)}>Cancel</button>
+            </form>
+          )}
           <div className="flex items-center gap-3 pt-1">
             <button
-              className={`btn btn-sm w-fit ${needsLicense ? "btn-ghost" : "btn-primary"}`}
+              className="btn btn-sm btn-primary w-fit"
+              disabled={actionBusy}
               onClick={handleAddAccount}
             >
-              {needsLicense && <Lock className="w-3.5 h-3.5" />}
               Add account
             </button>
-            {needsLicense && (
-              <span className="text-xs text-base-content/50">
-                *requires a license
-              </span>
-            )}
             <button
               type="button"
               className="btn btn-link btn-sm px-0"
               onClick={() => navigate("/profile")}
             >
-              Manage your profile
+              Manage shared profile
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* Section 2: License */}
-      <div ref={licenseSectionRef} className="card bg-base-200">
-        <div className="card-body space-y-4">
-          <h3 className="font-semibold">License</h3>
-
-          {account && (
-            <>
-              {license.active ? (
-                <div className="space-y-2">
-                  <div className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1 text-sm">
-                    <span className="text-base-content/50">Type</span>
-                    <span>{tierLabel(license)}</span>
-
-                    <span className="text-base-content/50">Key</span>
-                    <span className="font-mono">
-                      {license.key
-                        ? `XXXX-XXXX-${license.key.slice(-4)}`
-                        : ""}
-                    </span>
-
-                    {license.expiresAt && (
-                      <>
-                        <span className="text-base-content/50">Expires</span>
-                        <span>
-                          {new Date(license.expiresAt).toLocaleDateString()}
-                        </span>
-                      </>
-                    )}
-                  </div>
-                  <div className="flex gap-2 pt-1">
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={() =>
-                        window.api.openExternal(
-                          license.portalUrl || "https://paperweight.email",
-                        )
-                      }
-                    >
-                      Manage
-                    </button>
-                    <button
-                      className="btn btn-ghost btn-sm"
-                      onClick={handleDeactivateLicense}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <p className="text-sm text-base-content/60">
-                    Activate a license key to unlock full email history sync and multi-account support.
-                  </p>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      className="input input-bordered input-sm flex-1"
-                      placeholder="License key"
-                      value={licenseKey}
-                      onChange={(e) => setLicenseKey(e.target.value)}
-                      onKeyDown={(e) =>
-                        e.key === "Enter" && handleActivateLicense()
-                      }
-                    />
-                    <button
-                      className="btn btn-primary btn-sm"
-                      disabled={licenseLoading || !licenseKey.trim()}
-                      onClick={handleActivateLicense}
-                    >
-                      {licenseLoading ? (
-                        <span className="loading loading-spinner loading-xs" />
-                      ) : (
-                        "Activate"
-                      )}
-                    </button>
-                  </div>
-                  {licenseError && (
-                    <p className="text-xs text-error">{licenseError}</p>
-                  )}
-                  <button
-                    className="btn btn-ghost btn-sm w-fit"
-                    onClick={() =>
-                      window.api.openExternal("https://paperweight.email")
-                    }
-                  >
-                    Buy License
-                  </button>
-                </div>
-              )}
-            </>
-          )}
         </div>
       </div>
 
       {/* Section 3: Sync */}
       <div className="card bg-base-200">
         <div className="card-body space-y-3">
-          <h3 className="font-semibold">Sync</h3>
+          <h3 className="font-semibold">Sync · Current account</h3>
+          <p className="text-sm text-base-content/60">Applies to {account?.email ?? "the selected account"} only.</p>
 
           {account && (
             <>
@@ -503,8 +450,46 @@ export default function Settings(): JSX.Element {
                 <span>{account.totalMessages.toLocaleString()}</span>
 
                 <span className="text-base-content/50">Sync period</span>
-                <span>{license.active ? "Full history" : `${FREE_TIER_SYNC_DAYS} days`}</span>
+                <span>Full history</span>
               </div>
+
+              {account.providerType === "gmail" && (
+                <div className="space-y-3 border-t border-base-300 pt-3">
+                  <h4 className="font-medium text-sm">Folders to include</h4>
+                  <p className="text-sm text-base-content/60">
+                    Inbox and archived mail are included. Optionally scan Spam and Trash too.
+                  </p>
+                  {([
+                    ["gmailIncludeSpam", "Include Spam"],
+                    ["gmailIncludeTrash", "Include Trash"],
+                  ] as const).map(([key, label]) => (
+                    <label key={key} className="flex items-center gap-3 text-sm cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="toggle toggle-sm toggle-primary"
+                        checked={gmailFolders[key]}
+                        disabled={savingGmailFolders}
+                        onChange={(event) => setGmailFolders((current) => ({ ...current, [key]: event.target.checked }))}
+                      />
+                      {label}
+                    </label>
+                  ))}
+                  <p className="text-xs text-base-content/60">
+                    Applying changes restarts the history scan. Previously imported emails stay in Paperweight.
+                  </p>
+                  <button
+                    className="btn btn-sm btn-primary"
+                    onClick={handleSaveGmailFolders}
+                    disabled={savingGmailFolders || (
+                      gmailFolders.gmailIncludeSpam === savedGmailFolders.gmailIncludeSpam &&
+                      gmailFolders.gmailIncludeTrash === savedGmailFolders.gmailIncludeTrash
+                    )}
+                  >
+                    {savingGmailFolders ? "Applying…" : "Apply and sync"}
+                  </button>
+                  {gmailFolderError && <p className="text-sm text-error" role="alert">{gmailFolderError}</p>}
+                </div>
+              )}
 
               {(account.providerType === "gmail" ||
                 account.providerType === "microsoft" ||
@@ -532,7 +517,8 @@ export default function Settings(): JSX.Element {
       {/* Section 4: App Settings */}
       <div className="card bg-base-200">
         <div className="card-body space-y-3">
-          <h3 className="font-semibold">App Settings</h3>
+          <h3 className="font-semibold">App Settings · All accounts</h3>
+          <p className="text-sm text-base-content/60">Launch preferences and the color theme apply across all accounts.</p>
           <div className="form-control">
             <label className="label cursor-pointer justify-start gap-3">
               <input
@@ -578,7 +564,8 @@ export default function Settings(): JSX.Element {
       {/* Section 5: Whitelist */}
       <div className="card bg-base-200">
         <div className="card-body space-y-3">
-          <h3 className="font-semibold">Whitelist</h3>
+          <h3 className="font-semibold">Whitelist · Current account</h3>
+          <p className="text-sm text-base-content/60">Applies to {account?.email ?? "the selected account"} only.</p>
           <p className="text-sm text-base-content/60">
             Whitelisted domains and addresses are hidden from Mail. Add a domain
             (e.g. example.com) to whitelist all senders from it, or an address
@@ -788,7 +775,7 @@ export default function Settings(): JSX.Element {
               <span className="font-medium">{removeAccountEmail}</span>, including
               synced emails and settings.
             </p>
-            <p className="py-4">Your license is not affected.</p>
+            <p className="py-4">Your other connected accounts are not affected.</p>
             {deletionError && (
               <p className="text-sm text-error">{deletionError}</p>
             )}

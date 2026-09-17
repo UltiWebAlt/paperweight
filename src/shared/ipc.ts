@@ -89,7 +89,8 @@ export const IPC = {
   getRiskCounts: "get-risk-counts",
   getActivityLog: "get-activity-log",
   listAccounts: "list-accounts",
-  addAccount: "add-account",
+  setAccountLabel: "set-account-label",
+  getAccountHealth: "get-account-health",
   switchAccount: "switch-account",
   removeAccount: "remove-account",
   accountSwitched: "account-switched",
@@ -186,7 +187,8 @@ export interface ElectronAPI {
   getRiskCounts: () => Promise<RiskCounts>;
   getActivityLog: (limit: number, offset: number) => Promise<{ entries: ActivityEntry[]; total: number }>;
   listAccounts: () => AccountSummary[];
-  addAccount: () => Promise<{ blocked: true; reason: "license_required" } | null>;
+  setAccountLabel: (email: string, label: string) => Promise<void>;
+  getAccountHealth: () => Promise<import("./types").AccountHealth[]>;
   switchAccount: (email: string) => Promise<void>;
   removeAccount: (email: string) => Promise<void>;
   onAccountSwitched: (callback: (email: string) => void) => () => void;

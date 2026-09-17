@@ -36,6 +36,7 @@ import {
   deleteCredentials,
   loadCredentials,
   listAccounts,
+  setAccountLabel,
   getActiveEmail,
   setActiveEmail,
   removeAccountEntry,
@@ -46,6 +47,7 @@ import { wipeGlobalDatabase } from "../globalDb";
 import { dataLog, actionLog } from "../utils/log";
 import { getFileLogPath } from "../utils/file-log";
 import os from "os";
+import { readAccountHealth } from "../services/accountHealth";
 
 type ServerConfigInput = ServerConfig & { smtp: NonNullable<ServerConfig["smtp"]> };
 
@@ -140,25 +142,20 @@ export function registerAccountHandlers(): void {
 
   // --- Multi-account management ---
 
-  // Pre-flight license check before the renderer starts an OAuth flow.
-  // Intentionally two-step: this returns immediately so the renderer can show
-  // the license modal inline, then the actual auth IPC (startGmailAuth etc.)
-  // is called separately once the user is cleared to proceed.
-  ipcMain.handle(IPC.addAccount, () => {
-    const existing = listAccounts();
-    if (existing.length >= 1) {
-      const license = getLicenseStatus();
-      if (!license.active) {
-        return { blocked: true, reason: "license_required" };
-      }
-    }
-    return null;
+  ipcMain.handle(IPC.setAccountLabel, (_event, email: unknown, label: unknown) => {
+    if (!isString(email) || !isString(label)) throw new Error("Invalid account label");
+    setAccountLabel(email, label);
   });
+
+  ipcMain.handle(IPC.getAccountHealth, () => listAccounts().map((account) =>
+    readAccountHealth(account.email, getSyncStatus(account.email), !!loadCredentials(account.email)),
+  ));
 
   ipcMain.on(IPC.listAccounts, (event) => {
     const activeEmail = getActiveEmail();
     event.returnValue = listAccounts().map((a) => ({
       email: a.email,
+      label: a.label,
       providerType: a.providerType,
       registeredAt: a.registeredAt,
       isActive: a.email === activeEmail,

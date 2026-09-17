@@ -18,6 +18,9 @@ jest.mock("electron", () => ({
 }));
 
 import {
+  listAccounts,
+  setAccountLabel,
+  registerAccount,
   deleteCredentials,
   emailToFileKey,
   hasCredentials,
@@ -38,6 +41,21 @@ describe("credentials without active account", () => {
 
   afterEach(() => {
     rmSync(userDataDir, { recursive: true, force: true });
+  });
+
+  it("persists trimmed labels without changing other accounts and preserves them on registration", () => {
+    writeFileSync(join(userDataDir, "accounts.json"), JSON.stringify({ accounts: [
+      { email: "one@example.com", providerType: "gmail" },
+      { email: "two@example.com", providerType: "imap", label: "Work" },
+    ] }));
+    setAccountLabel("one@example.com", "  Personal  ");
+    expect(listAccounts().map((account) => account.label)).toEqual(["Personal", "Work"]);
+    registerAccount("one@example.com", "gmail");
+    expect(listAccounts()[0].label).toBe("Personal");
+    setAccountLabel("one@example.com", "  ");
+    expect(listAccounts()[0].label).toBeUndefined();
+    expect(() => setAccountLabel("missing@example.com", "Work")).toThrow("Account not found");
+    expect(() => setAccountLabel("one@example.com", "x".repeat(41))).toThrow();
   });
 
   it("loadCredentials returns undefined without throwing", () => {

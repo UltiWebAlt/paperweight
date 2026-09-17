@@ -45,6 +45,8 @@ const navItems = [
 
 export default function AppShell(): JSX.Element {
   const { accounts } = useAccounts();
+  const [switchError, setSwitchError] = useState("");
+  const [switching, setSwitching] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [unseenCaseReplies, setUnseenCaseReplies] = useState(0);
@@ -93,13 +95,23 @@ export default function AppShell(): JSX.Element {
   const handleSwitch = async (email: string) => {
     setDropdownOpen(false);
     if (activeAccount && email !== activeAccount.email) {
-      await window.api.switchAccount(email);
+      setSwitchError("");
+      setSwitching(true);
+      try {
+        await window.api.switchAccount(email);
+      } catch {
+        setSwitchError("Could not switch accounts. Please try again.");
+      } finally { setSwitching(false); }
       // App.tsx onAccountSwitched handler navigates to /dashboard and remounts the route tree
     }
   };
 
   return (
     <div className="flex h-screen overflow-hidden">
+      {switchError && <div role="alert" className="alert alert-error fixed bottom-4 left-4 z-50 max-w-sm">
+        <span>{switchError}</span>
+        <button className="btn btn-ghost btn-xs" onClick={() => setSwitchError("")}>Dismiss</button>
+      </div>}
       {/* Sidebar */}
       <aside className="w-18 xl:w-60 transition-all duration-200 bg-base-200 border-r border-base-300 flex flex-col shrink-0">
         {/* Branding */}
@@ -157,7 +169,7 @@ export default function AppShell(): JSX.Element {
               className="w-full flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-base-300 transition-colors justify-center xl:justify-start"
             >
               <img src={makeBlockie(activeAccount.email)} alt="" className="w-5 h-5 rounded-sm shrink-0" />
-              <span className="hidden xl:inline text-sm truncate text-base-content/70">{activeAccount.email}</span>
+              <span className="hidden xl:inline text-sm truncate text-base-content/70" title={activeAccount.email}>{activeAccount.label || activeAccount.email}</span>
             </button>
 
             {dropdownOpen && (
@@ -165,11 +177,12 @@ export default function AppShell(): JSX.Element {
                 {accounts.map((acc) => (
                   <button
                     key={acc.email}
+                    disabled={switching}
                     onClick={() => handleSwitch(acc.email)}
                     className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-base-300 transition-colors text-left"
                   >
                     <img src={makeBlockie(acc.email)} alt="" className="w-7 h-7 rounded-md shrink-0" />
-                    <span className="text-sm truncate flex-1">{acc.email}</span>
+                    <span className="text-sm truncate flex-1" title={acc.email}>{acc.label || acc.email}</span>
                     {acc.isActive && <Check className="w-4 h-4 shrink-0 text-success" />}
                   </button>
                 ))}
