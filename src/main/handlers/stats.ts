@@ -5,7 +5,7 @@ import { getDashboardStats, getDashboardTrend, getImpactStats, getRiskCounts, ge
 export function registerStatsHandlers(): void {
   ipcMain.handle(IPC.getDashboardStats, () => getDashboardStats());
 
-  ipcMain.handle(IPC.getDashboardTrend, () => getDashboardTrend(90));
+  ipcMain.handle(IPC.getDashboardTrend, () => getDashboardTrend());
 
   ipcMain.handle(IPC.getImpactStats, () => getImpactStats());
 

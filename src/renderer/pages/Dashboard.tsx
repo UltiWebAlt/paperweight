@@ -6,7 +6,6 @@ import type {
   DashboardStats,
   GdprCaseSummary,
 } from "@shared/types";
-import { useLicense } from "../context/LicenseContext";
 import TrendChartCard from "../components/TrendChartCard";
 import ImpactBlock from "../components/ImpactBlock";
 import { AlertTriangle, ArrowRight, ChevronRight, Contact, FolderClosed, Inbox, Mail } from "lucide-react";
@@ -28,31 +27,75 @@ export default function Dashboard(): JSX.Element {
     series: [],
     markers: [],
   });
-  const license = useLicense();
   const [loading, setLoading] = useState(true);
-  const [impactKey] = useState(0);
+  const [impactKey, setImpactKey] = useState(0);
   const [account, setAccount] = useState<AccountInfo>();
   const [dueCases, setDueCases] = useState<GdprCaseSummary[]>([]);
   const [activeCasesCount, setActiveCasesCount] = useState(0);
 
-  const fetchData = async (silent = false): Promise<void> => {
-    if (!silent) setLoading(true);
-    const [statsData, trendData, accountData, activeCases] = await Promise.all([
-      window.api.getDashboardStats(),
-      window.api.getDashboardTrend(),
-      window.api.getAccountInfo(),
-      window.api.queryGdprCases({ status: "active" }),
-    ]);
-    setStats(statsData);
-    setTrend(trendData);
-    setAccount(accountData);
-    setActiveCasesCount(activeCases.length);
-    setDueCases(activeCases.filter((c) => c.nextAction));
-    setLoading(false);
-  };
-
   useEffect(() => {
-    fetchData();
+    let disposed = false;
+    let inFlight = false;
+    let refreshPending = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const refresh = async (): Promise<void> => {
+      if (disposed) return;
+      if (inFlight) {
+        refreshPending = true;
+        return;
+      }
+      inFlight = true;
+      try {
+        const [statsData, trendData, accountData, activeCases] = await Promise.all([
+          window.api.getDashboardStats(),
+          window.api.getDashboardTrend(),
+          window.api.getAccountInfo(),
+          window.api.queryGdprCases({ status: "active" }),
+        ]);
+        if (disposed) return;
+        setStats(statsData);
+        setTrend(trendData);
+        setAccount(accountData);
+        setActiveCasesCount(activeCases.length);
+        setDueCases(activeCases.filter((c) => c.nextAction));
+        setImpactKey((key) => key + 1);
+      } catch (error) {
+        console.error("Failed to refresh dashboard", error);
+      } finally {
+        inFlight = false;
+        if (!disposed) {
+          setLoading(false);
+          if (refreshPending) {
+            refreshPending = false;
+            void refresh();
+          }
+        }
+      }
+    };
+
+    const unsubscribe = window.api.onSyncProgress((status) => {
+      if (!status.running) {
+        // Always fetch the final committed state, even during a pending refresh.
+        clearTimeout(timer);
+        timer = undefined;
+        void refresh();
+      } else if (timer === undefined) {
+        // Progress arrives per message. Coalesce reads without postponing them
+        // indefinitely during a long import or flashing the loading screen.
+        timer = setTimeout(() => {
+          timer = undefined;
+          void refresh();
+        }, 2000);
+      }
+    });
+    void refresh();
+
+    return () => {
+      disposed = true;
+      clearTimeout(timer);
+      unsubscribe();
+    };
   }, []);
 
   const needsSmtpSetup =
@@ -76,26 +119,6 @@ export default function Dashboard(): JSX.Element {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Dashboard</h1>
-
-      {!license.active && (
-        <div
-          className="flex items-center justify-between p-4 bg-primary/10 border border-primary/20 rounded-box cursor-pointer hover:bg-primary/15 transition-colors"
-          onClick={() => navigate("/settings")}
-        >
-          <div>
-            <p className="font-semibold text-base-content">
-              Upgrade your account
-            </p>
-            <p className="text-sm text-base-content/60">
-              Activate a license to unlock full email history sync and more.
-            </p>
-          </div>
-          <ArrowRight
-            className="w-5 h-5 text-primary shrink-0"
-            aria-hidden="true"
-          />
-        </div>
-      )}
 
       {needsSmtpSetup && (
         <div
@@ -291,7 +314,7 @@ export default function Dashboard(): JSX.Element {
       <TrendChartCard
         trend={trend}
         title="Daily emails"
-        description="Total emails received over time"
+        description="Imported emails by date received · expands as older history syncs"
         trendDirection="down"
       />
     </div>

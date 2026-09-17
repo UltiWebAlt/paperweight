@@ -256,14 +256,21 @@ interface DailyCountRow {
   count: number;
 }
 
-export function getDashboardTrend(windowDays: number): ChartTrend {
+export function getDashboardTrend(): ChartTrend {
   const d = getDb();
-  const safeDays = Math.min(365, Math.max(1, Math.floor(windowDays)));
 
   const endDayStart = utcMidnightMs(Date.now());
   const dayMs = 24 * 60 * 60 * 1000;
-  const startDayStart = endDayStart - (safeDays - 1) * dayMs;
   const endMs = endDayStart + dayMs - 1;
+  // Keep at least 90 days visible, expanding as older history is imported.
+  // Ignore malformed dates outside the same floor used by historical sync.
+  const { oldest } = d.prepare(
+    "SELECT MIN(date) AS oldest FROM messages WHERE date BETWEEN ? AND ?",
+  ).get(Date.UTC(1995, 0, 1), endMs) as { oldest: number | null };
+  const defaultStart = endDayStart - 89 * dayMs;
+  const startDayStart = oldest === null
+    ? defaultStart
+    : Math.min(defaultStart, utcMidnightMs(oldest));
 
   const rows = d
     .prepare(

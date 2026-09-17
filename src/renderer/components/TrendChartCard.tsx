@@ -22,6 +22,7 @@ export default function TrendChart({
   const rawMax = Math.max(0, ...values);
   const { max: yMax, ticks: yTicks } = niceMax(rawMax, 5);
   const yAxisWidth = yMax >= 1000 ? 36 : yMax >= 100 ? 28 : 22;
+  const spansYears = trend.labels[0]?.slice(0, 4) !== trend.labels.at(-1)?.slice(0, 4);
 
   const t = computeTrend(values, 7);
 
@@ -73,7 +74,7 @@ export default function TrendChart({
               />
               <XAxis
                 dataKey="label"
-                tickFormatter={(label) => formatUtcStrictDate(label, "MMM D")}
+                tickFormatter={(label) => formatUtcStrictDate(label, spansYears ? "MMM D, YYYY" : "MMM D")}
                 interval="preserveStartEnd"
                 minTickGap={30}
                 tickMargin={12}
@@ -84,6 +85,7 @@ export default function TrendChart({
               />
 
               <Line
+                isAnimationActive={false}
                 type="linear"
                 dataKey="value"
                 dot={false}
