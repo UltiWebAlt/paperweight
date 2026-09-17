@@ -6,6 +6,7 @@ import type { AnalyzeOptions, RawMessage } from "@paperweight/analysis";
 import { BODY_TEXT_MAX_LENGTH } from "@shared/config";
 import { headerRecord } from "@shared/utils";
 import { syncLog, authLog } from "../utils/log";
+import { GmailApiError, gmailRequest } from "./gmail-request";
 
 // Injected at build time via electron-vite define.
 // Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET env vars before building.
@@ -146,7 +147,6 @@ async function gmailApiFetch(
   path: string,
   params?: Record<string, string | string[]>
 ): Promise<unknown> {
-  const token = await getValidAccessToken();
   const url = new URL(`${GMAIL_API_BASE}${path}`);
   if (params) {
     for (const [k, v] of Object.entries(params)) {
@@ -158,14 +158,12 @@ async function gmailApiFetch(
     }
   }
 
-  const response = await fetch(url.toString(), {
-    headers: { Authorization: `Bearer ${token}` },
+  const response = await gmailRequest(async () => {
+    const token = await getValidAccessToken();
+    return fetch(url.toString(), {
+      headers: { Authorization: `Bearer ${token}` },
+    });
   });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Gmail API error (${response.status}): ${text}`);
-  }
 
   return response.json();
 }
@@ -177,14 +175,14 @@ async function gmailApiPost(
   const token = await getValidAccessToken();
   const url = `${GMAIL_API_BASE}${path}`;
 
-  const response = await fetch(url, {
+  const response = await gmailRequest(() => fetch(url, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
     body: body ? JSON.stringify(body) : undefined,
-  });
+  }), { retry: path !== "/messages/send" });
 
   if (!response.ok) {
     const text = await response.text();
@@ -200,9 +198,9 @@ export async function fetchGmailProfileEmail(
   accessToken: string
 ): Promise<string | undefined> {
   try {
-    const resp = await fetch(`${GMAIL_API_BASE}/profile`, {
+    const resp = await gmailRequest(() => fetch(`${GMAIL_API_BASE}/profile`, {
       headers: { Authorization: `Bearer ${accessToken}` },
-    });
+    }));
     if (!resp.ok) {
       const body = await resp.text().catch(() => "");
       authLog.error(`Gmail profile fetch failed (${resp.status}): ${body}`);
@@ -432,6 +430,9 @@ export function createGmailProvider(
           emailMessages.push(await parseGmailMessage(msg, analysisOptions));
           onProgress?.(emailMessages.length, estimatedTotal);
         } catch (err) {
+          // A deleted message can disappear between list and get. Other failures
+          // must stop this page so the sync checkpoint cannot skip unread mail.
+          if (!(err instanceof GmailApiError) || err.status !== 404) throw err;
           syncLog.error(`Failed to fetch message ${msgRef.id}:`, err instanceof Error ? err.message : String(err));
         }
       }

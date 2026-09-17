@@ -451,6 +451,9 @@ async function bulkActionVendorMessages(
             }
           } catch (err) {
             actionLog.error(`${label}: failed on message ${id}: ${err instanceof Error ? err.message : String(err)}`);
+            // Stop a failed batch instead of hammering the remaining messages or
+            // deleting local records for operations Google has not accepted.
+            throw err;
           }
         }
         const { count, sizeBytes } = deleteVendorMessages(vendorId, types);

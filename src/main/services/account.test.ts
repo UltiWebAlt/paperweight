@@ -14,6 +14,11 @@ const mockTestSmtpConnection = jest.fn();
 const mockCreateAccountDb = jest.fn();
 const mockReconnectDb = jest.fn();
 
+jest.mock("electron", () => ({
+  app: { getPath: jest.fn(() => "/tmp/paperweight-test") },
+  BrowserWindow: { getAllWindows: jest.fn(() => []) },
+}));
+
 jest.mock("../credentials", () => ({
   loadCredentials: mockLoadCredentials,
   saveCredentials: mockSaveCredentials,
@@ -94,6 +99,24 @@ describe("account authentication", () => {
       registeredAt: 123,
     }]);
     mockGetActiveEmail.mockReturnValue("other@example.com");
+  });
+
+  it("adds a second Gmail account with its own credentials and database", async () => {
+    mockFetchGmailProfileEmail.mockResolvedValue("second@example.com");
+
+    const result = await startGmailAuthAndRecordAccount({ type: "add" }, true);
+
+    expect(result).toEqual({ success: true });
+    expect(mockSaveCredentials).toHaveBeenCalledWith(
+      expect.objectContaining({ providerType: "gmail" }),
+      "second@example.com",
+    );
+    expect(mockRegisterAccount).toHaveBeenCalledWith(
+      "second@example.com", "gmail", expect.any(Number),
+    );
+    expect(mockCreateAccountDb).toHaveBeenCalledTimes(1);
+    expect(mockReconnectDb).toHaveBeenCalledTimes(1);
+    expect(mockDeleteCredentials).toHaveBeenCalledWith("__staging__");
   });
 
   it("does not persist or register an existing account returned by Add", async () => {
@@ -236,5 +259,23 @@ describe("account authentication", () => {
     expect(mockRegisterAccount).not.toHaveBeenCalled();
     expect(mockCreateAccountDb).not.toHaveBeenCalled();
     expect(mockReconnectDb).not.toHaveBeenCalled();
+  });
+});
+
+
+describe("bulk action failures", () => {
+  it("stops after a failed remote operation and retains local records", async () => {
+    const { getProvider } = require("../providers/ProviderFactory");
+    const { getMessageIdsByVendor, deleteVendorMessages } = require("./messages");
+    const { trashVendorMessages } = require("./account");
+    const trashMessage = jest.fn().mockRejectedValue(new Error("Gmail quota exhausted"));
+    const disconnect = jest.fn().mockResolvedValue(undefined);
+    getProvider.mockReturnValue({ connect: jest.fn().mockResolvedValue({}), disconnect, trashMessage });
+    getMessageIdsByVendor.mockReturnValue(["first", "second", "third"]);
+    await trashVendorMessages(1);
+    await new Promise((resolve) => setImmediate(resolve));
+    expect(trashMessage).toHaveBeenCalledTimes(1);
+    expect(deleteVendorMessages).not.toHaveBeenCalled();
+    expect(disconnect).toHaveBeenCalled();
   });
 });
