@@ -37,11 +37,19 @@ IMAP Presets: Proton, Yahoo Mail, Fastmail, Yandex, Zoho, Mailbox.org, Posteo, G
 3. Scan your inbox in ~2 minutes
 4. Start unsubscribing and deleting
 
+For Gmail, **Settings → Sync → Folders to include** lets you include Spam and
+Trash independently. Both are off by default. **Apply and sync** restarts the
+history scan with your selection; previously imported emails remain in Paperweight.
+
+Connect additional accounts through **Settings → Accounts → Add account**.
+Multi-account support is enabled by default; no license or `.env` changes are needed.
+The `.env` OAuth client credentials identify the application, not individual email accounts.
+
 ## License
 
-Core features available for free. Upgrade for unlimited history, multiple accounts and to support open-source software development.
+Core features and multiple email accounts are available for free. Purchasing a license supports open-source software development.
 
-- **Free tier**: 90-day email scan, core features included
+- **Free tier**: Full email history, multiple email accounts, core features included
 - **Perpetual license**: All features, unlimited email history, multiple email accounts, permanent use of Paperweight
 
 [Buy a perpetual license and support development →](https://www.paperweight.email/#pricing)
@@ -49,6 +57,8 @@ Core features available for free. Upgrade for unlimited history, multiple accoun
 ## Development
 
 If you're building from source you need to add your own OAuth credentials. Copy [`.env.example`](.env.example) as `.env` and add your own Google and Microsoft client info.
+
+Values in the project-root `.env` override shell/IDE environment variables. Restart `yarn dev` after editing it; packaged builds need to be rebuilt to use updated OAuth credentials.
 
 **Google** - https://console.cloud.google.com/
 - Create OAuth 2.0 credentials, application type "Desktop app"
@@ -74,3 +84,17 @@ need native speakers. Adding or improving a language is a single-file data
 contribution — no engine knowledge required. See
 [`analysis/src/data/lexicons/README.md`](analysis/src/data/lexicons/README.md)
 for the rules.
+
+### Gmail request pacing
+
+All Gmail REST calls (sync, profile lookup, trash/spam/read actions, and sending)
+use the mandatory gate in `src/main/providers/gmail-request.ts`. The app starts
+at one request per second across all accounts and workers. Quota errors slow
+that pace and persist a shared cooldown in `global.db`, honoring `Retry-After`.
+Restarting sync, switching accounts, or restarting the app does not reset it.
+This conservative shared budget can make large bulk actions take longer.
+
+Reads and idempotent label/trash actions have bounded backoff retries. Sending
+mail is paced but never automatically replayed. Failed bulk actions stop and
+retain local records so uncompleted operations are not reported as deleted.
+Provider routing and persistence tests run in the normal CI test suite.
