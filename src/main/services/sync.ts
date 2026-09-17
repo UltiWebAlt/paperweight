@@ -34,6 +34,10 @@ import { getRootDomain } from "@shared/utils";
 import type { SyncStatus } from "@shared/types";
 import { FREE_TIER_SYNC_DAYS, LICENSED_SYNC_DAYS } from "@shared/types";
 import { syncLog } from "../utils/log";
+import {
+  loadSyncPage, saveSyncPage, clearSyncPage,
+  INCREMENTAL_PAGE_KEY, HISTORICAL_PAGE_KEY,
+} from "./sync-pagination";
 import type { EmailMessage, EmailProvider } from "../providers/types";
 import {
   addReceivedProfileEmails,
@@ -113,6 +117,8 @@ function updateSyncState(update: SyncStateUpdate): void {
 }
 
 export function clearSyncData(): void {
+  clearSyncPage(INCREMENTAL_PAGE_KEY);
+  clearSyncPage(HISTORICAL_PAGE_KEY);
   getDb().exec(`
     DELETE FROM messages;
     DELETE FROM vendors;
@@ -289,15 +295,19 @@ async function runIncrementalSync(
   // Subsequent runs use last_sync_at (minus a small overlap) so the window size only
   // matters on first run.
   const syncDays = licensed ? LICENSED_SYNC_DAYS : FREE_TIER_SYNC_DAYS;
-  const since = syncState.last_sync_at
+  const fallbackSince = syncState.last_sync_at
     ? new Date(syncState.last_sync_at - INCREMENTAL_OVERLAP_MS)
     : new Date(Date.now() - syncDays * 86_400_000);
+  const checkpoint = loadSyncPage(INCREMENTAL_PAGE_KEY, { since: fallbackSince.getTime() });
+  const since = new Date(checkpoint.since);
+  saveSyncPage(INCREMENTAL_PAGE_KEY, checkpoint);
 
   syncLog.info(
     `Incremental sync: since ${since.toISOString()} (${isFirstRun ? "first run" : "incremental"})`,
   );
 
-  let pageToken = syncState.next_page_token;
+  // Legacy tokens did not preserve their query window and cannot be resumed safely.
+  let pageToken = checkpoint.pageToken;
   let totalFetched = 0;
   let pageNum = 0;
 
@@ -351,7 +361,7 @@ async function runIncrementalSync(
     if (result.nextPageToken) {
       pageToken = result.nextPageToken;
       // Save checkpoint so an interrupted sync can resume mid-page
-      updateSyncState({ last_sync_at: Date.now(), next_page_token: pageToken });
+      saveSyncPage(INCREMENTAL_PAGE_KEY, { since: since.getTime(), pageToken });
     } else {
       break;
     }
@@ -375,6 +385,7 @@ async function runIncrementalSync(
   }
 
   updateSyncState(stateUpdate);
+  clearSyncPage(INCREMENTAL_PAGE_KEY);
   currentStatus.lastSyncAt = now;
 
   syncLog.info(
@@ -411,6 +422,12 @@ async function runHistoricalChunk(
     isLastChunk = true;
   }
 
+  const checkpoint = loadSyncPage(HISTORICAL_PAGE_KEY, {
+    since: since.getTime(), until: until.getTime(),
+  });
+  since = new Date(checkpoint.since);
+  saveSyncPage(HISTORICAL_PAGE_KEY, checkpoint);
+
   syncLog.debug(
     `Historical chunk: ${since.toISOString().slice(0, 10)} → ${until.toISOString().slice(0, 10)}`,
   );
@@ -428,8 +445,8 @@ async function runHistoricalChunk(
   });
 
   // Paginate through all messages in this date-range chunk.
-  let pageToken: string | undefined;
-  let totalFetched = 0;
+  let pageToken = checkpoint.pageToken;
+  let totalFetched = checkpoint.fetched ?? 0;
 
   while (true) {
     const result = await provider.listMessages(
@@ -455,6 +472,9 @@ async function runHistoricalChunk(
 
     if (result.nextPageToken) {
       pageToken = result.nextPageToken;
+      saveSyncPage(HISTORICAL_PAGE_KEY, {
+        since: since.getTime(), until: until.getTime(), pageToken, fetched: totalFetched,
+      });
     } else {
       break;
     }
@@ -474,10 +494,12 @@ async function runHistoricalChunk(
   if (isLastChunk) {
     recomputeAllVendorFlags();
     updateSyncState({ historical_cursor: since.getTime(), historical_done: 1 });
+    clearSyncPage(HISTORICAL_PAGE_KEY);
     return { hasMore: false, count: totalFetched };
   }
 
   updateSyncState({ historical_cursor: since.getTime() });
+  clearSyncPage(HISTORICAL_PAGE_KEY);
   return { hasMore: true, count: totalFetched };
 }
 
