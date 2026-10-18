@@ -3,6 +3,7 @@
  * Run via: cross-env ELECTRON_RUN_AS_NODE=1 electron --import tsx scripts/generate-smoke-fixture.ts <userDataDir>
  */
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
+import { randomBytes } from "crypto";
 import { join } from "path";
 import { createAccountDb, initDb } from "../src/main/db";
 import { emailToFileKey } from "../src/main/credentials";
@@ -73,7 +74,7 @@ writeFileSync(
       port: 993,
       tls: true,
       username: SMOKE_TEST_EMAIL,
-      password: "smoke-fixture-not-real",
+      password: randomBytes(32).toString("hex"),
     },
   }),
   "utf-8",

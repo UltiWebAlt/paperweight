@@ -403,7 +403,7 @@ export default function Settings(): JSX.Element {
                 placeholder="Personal or Work" maxLength={40} value={labelDraft} disabled={savingLabel}
                 onChange={(event) => setLabelDraft(event.target.value)} />
               <p className="text-xs text-base-content/60">Optional. Leave blank to show the email address.</p>
-              <button className="btn btn-primary btn-sm" disabled={actionBusy}>{savingLabel ? "Saving…" : "Save label"}</button>
+              <button type="submit" className="btn btn-primary btn-sm" disabled={actionBusy}>{savingLabel ? "Saving…" : "Save label"}</button>
               <button type="button" className="btn btn-ghost btn-sm" disabled={savingLabel} onClick={() => setEditingLabel(null)}>Cancel</button>
             </form>
           )}
@@ -712,7 +712,7 @@ export default function Settings(): JSX.Element {
           </div>
           {addAccountView === "provider" && (
             <form method="dialog" className="modal-backdrop">
-              <button onClick={() => setShowAddAccountModal(false)}>
+              <button type="submit" onClick={() => setShowAddAccountModal(false)}>
                 close
               </button>
             </form>
@@ -744,7 +744,7 @@ export default function Settings(): JSX.Element {
             </div>
           </div>
           <form method="dialog" className="modal-backdrop">
-            <button onClick={() => setShowResyncModal(false)}>close</button>
+            <button type="submit" onClick={() => setShowResyncModal(false)}>close</button>
           </form>
         </dialog>
       )}
@@ -819,7 +819,7 @@ export default function Settings(): JSX.Element {
             </div>
           </div>
           <form method="dialog" className="modal-backdrop">
-            <button
+            <button type="submit"
               disabled={removeInProgress}
               onClick={() => {
                 setDeletionError("");
@@ -870,7 +870,7 @@ export default function Settings(): JSX.Element {
             </div>
           </div>
           <form method="dialog" className="modal-backdrop">
-            <button
+            <button type="submit"
               disabled={wipeInProgress}
               onClick={() => {
                 setDeletionError("");

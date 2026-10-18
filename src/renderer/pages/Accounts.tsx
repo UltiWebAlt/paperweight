@@ -463,7 +463,7 @@ export default function Accounts(): JSX.Element {
                   key={vendor.id}
                   className={`card bg-base-200 overflow-visible rounded-2xl border-l-4 ${RISK_BORDER[computedRisk] ?? RISK_BORDER.unknown}`}
                 >
-                  <div
+                  <div role="button" tabIndex={0}
                     className="p-4 cursor-pointer hover:bg-base-300 transition-colors rounded-2xl group"
                     onClick={() => {
                       const allGroupKeys = vendors.map(v => v.root_domain ?? v.company_slug ?? String(v.id));
@@ -474,6 +474,12 @@ export default function Accounts(): JSX.Element {
                           accountNav: { groupKeys: allGroupKeys, currentIndex, vendorQuery: currentQuery, total, restoreState: { page, sortBy, search, riskFilter, activityFilter, dataTypeFilter, volumeFilter, categoryFilter, piiTypeFilter, anyBreachFilter, showReviewed } },
                         },
                       });
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
+                        event.preventDefault();
+                        event.currentTarget.click();
+                      }
                     }}
                   >
                     <div className="flex items-center gap-3 w-full">
@@ -518,6 +524,7 @@ export default function Accounts(): JSX.Element {
                       <div
                         className="flex items-center gap-1 ml-auto opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                         onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(event) => event.stopPropagation()}
                       >
                         {vendor.root_domain && (
                           <button

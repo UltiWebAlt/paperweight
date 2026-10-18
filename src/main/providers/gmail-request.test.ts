@@ -1,5 +1,7 @@
 import { createGmailRequest, GmailApiError } from "./gmail-request";
 
+jest.mock("crypto", () => ({ ...jest.requireActual("crypto"), randomInt: jest.fn(() => 0) }));
+
 jest.mock("../utils/log", () => ({ syncLog: { info: jest.fn() } }));
 jest.mock("../services/settings", () => ({ getSetting: jest.fn(), saveSetting: jest.fn() }));
 
@@ -15,7 +17,6 @@ const quotaBody = JSON.stringify({
 beforeEach(() => {
   jest.useFakeTimers();
   jest.setSystemTime(0);
-  jest.spyOn(Math, "random").mockReturnValue(0);
 });
 afterEach(() => {
   jest.useRealTimers();

@@ -20,6 +20,7 @@
  * Then switch to "test-cases@paperweight.local" from the account switcher.
  */
 import { existsSync, readFileSync, rmSync, writeFileSync } from "fs";
+import { randomBytes } from "crypto";
 import { homedir } from "os";
 import { join } from "path";
 import { createAccountDb, initDb, getDb } from "../src/main/db";
@@ -108,7 +109,7 @@ writeFileSync(
       port: 993,
       tls: true,
       username: TEST_EMAIL,
-      password: "seed-fixture-not-real",
+      password: randomBytes(32).toString("hex"),
       smtp: {
         host: "smtp.seed.invalid",
         port: 465,

@@ -188,10 +188,16 @@ export default function PiiValueList({
 
         return (
           <div key={value.ref} className="card bg-base-200 overflow-visible rounded-2xl">
-            <div
+            <div role="button" tabIndex={0} aria-expanded={isExpanded}
               className={`group p-4 cursor-pointer hover:bg-base-300 transition-colors ${isExpanded ? "rounded-t-2xl" : "rounded-2xl"
                 }`}
               onClick={() => toggleExpand(value)}
+              onKeyDown={(event) => {
+                if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
+                  event.preventDefault();
+                  event.currentTarget.click();
+                }
+              }}
             >
               <div className={`${ROW_GRID} w-full`}>
                 <input
@@ -230,6 +236,7 @@ export default function PiiValueList({
                   className={`flex items-center gap-2 transition-opacity ${isExpanded ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                     }`}
                   onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(event) => event.stopPropagation()}
                 >
                   <span
                     className="tooltip tooltip-top"
@@ -304,9 +311,10 @@ export default function PiiValueList({
                 ) : (
                   <div className="divide-y divide-base-300">
                     {valueCompanies.map((company) => (
-                      <div
+                      <button
+                        type="button"
                         key={company.groupKey}
-                        className="px-4 py-3 flex items-center gap-4 cursor-pointer hover:bg-base-300 transition-colors"
+                        className="w-full text-left px-4 py-3 flex items-center gap-4 cursor-pointer hover:bg-base-300 transition-colors"
                         onClick={(e) => {
                           e.stopPropagation();
                           navigate(`/accounts/${encodeURIComponent(company.groupKey)}`);
@@ -321,7 +329,7 @@ export default function PiiValueList({
                           strokeWidth={1.5}
                           aria-hidden="true"
                         />
-                      </div>
+                      </button>
                     ))}
                   </div>
                 )}

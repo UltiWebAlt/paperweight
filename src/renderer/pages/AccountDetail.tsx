@@ -1072,8 +1072,8 @@ export default function AccountDetail(): JSX.Element {
           id="breach-alert"
           className={`card ${anyLikelyAffected ? "bg-error/10 border border-error/30" : "bg-warning/10 border border-warning/30"}`}
         >
-          <div
-            className="p-4 flex items-center gap-3 cursor-pointer"
+          <button type="button" aria-expanded={breachOpen}
+            className="w-full text-left p-4 flex items-center gap-3 cursor-pointer"
             onClick={() => setBreachOpen(!breachOpen)}
           >
             <ChevronRight
@@ -1084,7 +1084,7 @@ export default function AccountDetail(): JSX.Element {
             <span className="font-semibold">
               {anyLikelyAffected ? "Security alert" : "Past security incident"}
             </span>
-          </div>
+          </button>
           {breachOpen && (
             <div className="px-4 pb-4 flex flex-col gap-4">
               <ul className="text-sm space-y-1 list-disc list-inside">
@@ -1144,8 +1144,8 @@ export default function AccountDetail(): JSX.Element {
 
       {/* Risk profile is category-based context, not observed email data. */}
       <div className="card bg-base-200">
-        <div
-          className={`p-4 flex items-center gap-3 ${hasRiskDetails ? "cursor-pointer" : ""}`}
+        <button type="button" aria-expanded={riskOpen} disabled={!hasRiskDetails}
+          className={`w-full text-left p-4 flex items-center gap-3 ${hasRiskDetails ? "cursor-pointer" : ""}`}
           onClick={hasRiskDetails ? () => setRiskOpen(!riskOpen) : undefined}
         >
           {hasRiskDetails && (
@@ -1161,7 +1161,7 @@ export default function AccountDetail(): JSX.Element {
           <span className="text-base-content/60 text-sm">
             {riskDescription}
           </span>
-        </div>
+        </button>
         {riskOpen && hasRiskDetails && (
           <div className="px-4 pb-4 space-y-4">
             {catInfo && (
@@ -1715,7 +1715,7 @@ export default function AccountDetail(): JSX.Element {
       {/* Delete confirm modal */}
       {whitelistModalOpen && (
         <div className="modal modal-open">
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-box">
             <h3 className="font-bold text-lg mb-4">Add to whitelist</h3>
             <div className="text-sm text-base-content/80 space-y-3">
               <p>Select an email address or domain to whitelist.</p>

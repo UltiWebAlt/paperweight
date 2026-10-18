@@ -1374,11 +1374,17 @@ export default function Mail(): JSX.Element {
                   key={vendor.id}
                   className="card bg-base-200 overflow-visible rounded-2xl"
                 >
-                  <div
+                  <div role="button" tabIndex={0} aria-expanded={isExpanded}
                     className={`group p-4 cursor-pointer hover:bg-base-300 transition-colors ${
                       isExpanded ? "rounded-t-2xl" : "rounded-2xl"
                     }`}
                     onClick={() => handleToggleExpand(vendor)}
+                    onKeyDown={(event) => {
+                      if (event.target === event.currentTarget && (event.key === "Enter" || event.key === " ")) {
+                        event.preventDefault();
+                        event.currentTarget.click();
+                      }
+                    }}
                   >
                     <div className={`${ROW_GRID} w-full`}>
                       {/* Checkbox column */}
@@ -1436,6 +1442,7 @@ export default function Mail(): JSX.Element {
                       <div
                         className={`flex items-center gap-2 transition-opacity ${isExpanded ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
                         onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(event) => event.stopPropagation()}
                       >
                         {vendor.root_domain && (
                           <button

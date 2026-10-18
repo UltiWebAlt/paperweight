@@ -81,7 +81,7 @@ export default function ActionModal({
 
   return (
     <dialog ref={ref} className="modal" onClose={handleDialogClose}>
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-box">
         <h3 className="font-bold text-lg mb-4">{title}</h3>
         <div className="text-sm text-base-content/80 space-y-3">{children}</div>
         {error && <p className="text-error text-sm mt-3">{error}</p>}

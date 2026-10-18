@@ -1,3 +1,4 @@
+import { randomInt } from "crypto";
 import { syncLog } from "../utils/log";
 import { getGlobalDb } from "../globalDb";
 import { createGmailPacingStore } from "./gmail-pacing";
@@ -87,7 +88,7 @@ export function createGmailRequest(stateStore?: ReadStateStore) {
           ? seconds * 1000
           : retryAfter ? Date.parse(retryAfter) - Date.now() : 0;
         const backoff = Math.min((limited ? 60_000 : 1000) * 2 ** attempt, 120_000);
-        const delay = Math.max(backoff, headerDelay || 0) + Math.floor(Math.random() * 1000);
+        const delay = Math.max(backoff, headerDelay || 0) + randomInt(1000);
         nextRequestAt = Date.now() + delay;
         stateStore?.save({ nextRequestAt, requestIntervalMs });
         if (options.retry === false || attempt >= 5) throw new GmailApiError(response.status, body);

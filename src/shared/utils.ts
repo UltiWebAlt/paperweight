@@ -42,7 +42,7 @@ export function parseHeaderPairs(
 export function headerRecord(
   pairs: Array<[string, string]>,
 ): Record<string, string | string[]> {
-  const headers: Record<string, string | string[]> = {};
+  const headers: Record<string, string | string[]> = Object.create(null);
   for (const [name, value] of pairs) {
     const existing = headers[name];
     if (existing === undefined) headers[name] = value;

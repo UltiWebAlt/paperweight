@@ -40,7 +40,7 @@ const BLOCK_TAGS = new Set([
 // Invisible characters (soft hyphen, zero-width joiners, word joiner, BOM):
 // marketing mail pads its preview text with thousands of them, which skews
 // language detection and text-density signals.
-const INVISIBLE = /[\u00AD\u034F\u200B-\u200D\u2060\uFEFF]/g;
+const INVISIBLE = /\u034F|[\u00AD\u200B-\u200D\u2060\uFEFF]/g;
 
 export function htmlToText(html: string): HtmlToTextResult {
   let out = "";

@@ -196,7 +196,7 @@ export default function Onboarding(): JSX.Element {
             </div>
           </div>
           <form method="dialog" className="modal-backdrop">
-            <button onClick={() => setShowHelpModal(false)}>close</button>
+            <button type="submit" onClick={() => setShowHelpModal(false)}>close</button>
           </form>
         </dialog>
       )}

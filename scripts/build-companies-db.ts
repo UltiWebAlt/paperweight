@@ -67,7 +67,6 @@ const CATEGORY_MAP: Record<string, string> = {
   telecommunication: "communication",
   commerce: "shopping",
   travel: "shopping",
-  entertainment: "entertainment",
   utility: "services",
   church: "services",
   nonprofit: "services",

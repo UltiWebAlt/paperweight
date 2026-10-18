@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type {
   AccountInfo,
   ChartTrend,
@@ -121,11 +121,9 @@ export default function Dashboard(): JSX.Element {
       <h1 className="text-2xl font-bold">Dashboard</h1>
 
       {needsSmtpSetup && (
-        <div
+        <Link
           className="flex items-center justify-between p-4 bg-warning/10 border border-warning/20 rounded-box cursor-pointer hover:bg-warning/15 transition-colors"
-          onClick={() =>
-            navigate("/settings", { state: { openServerSettings: true } })
-          }
+          to={"/settings"} state={{ openServerSettings: true }}
         >
           <div className="flex items-center gap-3 min-w-0">
             <AlertTriangle
@@ -145,14 +143,14 @@ export default function Dashboard(): JSX.Element {
             className="w-5 h-5 text-warning shrink-0"
             aria-hidden="true"
           />
-        </div>
+        </Link>
       )}
 
       {/* Stat tiles — 2×2 at min window (800), 4 across from lg */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div
+        <Link
           className="stat border-none bg-base-200 rounded-box cursor-pointer hover:bg-base-300 transition-colors flex flex-col justify-between"
-          onClick={() => navigate("/dashboard")}
+          to={"/dashboard"}
         >
           <div className="flex items-center justify-between mb-1">
             <div className="font-semibold text-base text-base-content">
@@ -164,11 +162,11 @@ export default function Dashboard(): JSX.Element {
             {stats.totalMessages.toLocaleString()}
           </div>
           <p className="text-base-content/50 text-xs mt-1">&nbsp;</p>
-        </div>
+        </Link>
 
-        <div
+        <Link
           className="stat border-none bg-base-200 rounded-box cursor-pointer hover:bg-base-300 transition-colors flex flex-col justify-between"
-          onClick={() => navigate("/mail")}
+          to={"/mail"}
         >
           <div className="flex items-center justify-between mb-1">
             <div className="font-semibold text-base text-base-content">
@@ -182,11 +180,11 @@ export default function Dashboard(): JSX.Element {
           <p className="text-base-content/50 text-xs mt-1">
             {stats.mailingListsActioned.toLocaleString()} actioned · {stats.activeSubscriptions.toLocaleString()} priorities
           </p>
-        </div>
+        </Link>
 
-        <div
+        <Link
           className="stat border-none bg-base-200 rounded-box cursor-pointer hover:bg-base-300 transition-colors flex flex-col justify-between"
-          onClick={() => navigate("/accounts")}
+          to={"/accounts"}
         >
           <div className="flex items-center justify-between mb-1">
             <div className="font-semibold text-base text-base-content">
@@ -200,11 +198,11 @@ export default function Dashboard(): JSX.Element {
           <p className="text-base-content/50 text-xs mt-1">
             {stats.reviewedVendors.toLocaleString()} reviewed · {stats.highRiskUnreviewed.toLocaleString()} high risk
           </p>
-        </div>
+        </Link>
 
-        <div
+        <Link
           className="stat border-none bg-base-200 rounded-box cursor-pointer hover:bg-base-300 transition-colors flex flex-col justify-between"
-          onClick={() => navigate("/cases")}
+          to={"/cases"}
         >
           <div className="flex items-center justify-between mb-1">
             <div className="font-semibold text-base text-base-content">
@@ -220,7 +218,7 @@ export default function Dashboard(): JSX.Element {
               ? `${dueCases.length.toLocaleString()} need${dueCases.length !== 1 ? "" : "s"} attention`
               : " "}
           </p>
-        </div>
+        </Link>
       </div>
 
       <ImpactBlock refreshKey={impactKey} />
@@ -240,23 +238,21 @@ export default function Dashboard(): JSX.Element {
         {hasActionItems ? (
           <div className="space-y-2">
             {dueCases.length > 0 && (
-              <div
+              <Link
                 className="flex items-center justify-between p-3 bg-base-200 rounded-lg border-l-4 border-case cursor-pointer hover:bg-base-300 transition-colors"
-                onClick={() => navigate("/cases", { state: { filter: "needs_attention" } })}
+                to={"/cases"} state={{ filter: "needs_attention" }}
               >
                 <span>
                   {dueCases.length} data {dueCases.length !== 1 ? "requests need" : "request needs"} your attention
                 </span>
                 <ChevronRight className="w-5 h-5 text-base-content/50" aria-hidden="true" />
-              </div>
+              </Link>
             )}
 
             {stats.breachedCount > 0 && (
-              <div
+              <Link
                 className="flex items-center justify-between p-3 bg-base-200 rounded-lg border-l-4 border-error cursor-pointer hover:bg-base-300 transition-colors"
-                onClick={() =>
-                  navigate("/accounts", { state: { preset: "breached" } })
-                }
+                to={"/accounts"} state={{ preset: "breached" }}
               >
                 <span>
                   {stats.breachedCount} account
@@ -266,13 +262,13 @@ export default function Dashboard(): JSX.Element {
                   className="w-5 h-5 text-base-content/50"
                   aria-hidden="true"
                 />
-              </div>
+              </Link>
             )}
 
             {stats.activeSubscriptions > 0 && (
-              <div
+              <Link
                 className="flex items-center justify-between p-3 bg-base-200 rounded-lg border-l-4 border-primary cursor-pointer hover:bg-base-300 transition-colors"
-                onClick={() => navigate("/mail", { state: { preset: "priorities" } })}
+                to={"/mail"} state={{ preset: "priorities" }}
               >
                 <span>
                   {stats.activeSubscriptions} active mailing list
@@ -282,15 +278,13 @@ export default function Dashboard(): JSX.Element {
                   className="w-5 h-5 text-base-content/50"
                   aria-hidden="true"
                 />
-              </div>
+              </Link>
             )}
 
             {stats.highRiskUnreviewed > 0 && (
-              <div
+              <Link
                 className="flex items-center justify-between p-3 bg-base-200 rounded-lg border-l-4 border-secondary cursor-pointer hover:bg-base-300 transition-colors"
-                onClick={() =>
-                  navigate("/accounts", { state: { preset: "highrisk" } })
-                }
+                to={"/accounts"} state={{ preset: "highrisk" }}
               >
                 <span>
                   {stats.highRiskUnreviewed} high risk account
@@ -300,7 +294,7 @@ export default function Dashboard(): JSX.Element {
                   className="w-5 h-5 text-base-content/50"
                   aria-hidden="true"
                 />
-              </div>
+              </Link>
             )}
           </div>
         ) : (

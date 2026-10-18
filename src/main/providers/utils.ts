@@ -22,15 +22,15 @@ export function friendlyConnectionError(err: unknown): string {
   if (/ETIMEDOUT|ENOTFOUND/i.test(msg)) {
     return "Could not reach the mail server. Check the host and port.";
   }
-  if (/authenticate|login|credentials|invalid|Command failed/i.test(msg)) {
-    return "Authentication failed. Check your username and password.";
-  }
   if (
     /Failed to refresh access token|invalid_grant|token.*expired|token.*revoked/i.test(
       msg,
     )
   ) {
     return "Authorization expired. Reconnect your account to continue syncing.";
+  }
+  if (/authenticate|login|credentials|invalid|Command failed/i.test(msg)) {
+    return "Authentication failed. Check your username and password.";
   }
 
   return msg;
@@ -194,6 +194,13 @@ export function buildRfc822Message(
   body: string,
   inReplyTo?: string
 ): string {
+  // Unsubscribe links can supply these values. A line break in a header could
+  // inject recipients or replace message headers; only the body may span lines.
+  for (const value of [from, to, subject, inReplyTo]) {
+    if (value !== undefined && /[\r\n]/.test(value)) {
+      throw new Error("Email headers must not contain line breaks");
+    }
+  }
   const isAscii = (s: string): boolean => /^[\x00-\x7F]*$/.test(s);
   const encodeHeader = (s: string): string =>
     isAscii(s) ? s : `=?UTF-8?B?${Buffer.from(s, "utf-8").toString("base64")}?=`;

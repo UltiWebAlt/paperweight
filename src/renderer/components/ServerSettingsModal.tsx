@@ -145,7 +145,7 @@ export default function ServerSettingsModal({
         </form>
       </div>
       <form method="dialog" className="modal-backdrop">
-        <button onClick={onClose}>close</button>
+        <button type="submit" onClick={onClose}>close</button>
       </form>
     </dialog>
   );
