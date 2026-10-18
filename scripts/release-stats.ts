@@ -21,7 +21,7 @@ interface GitHubRelease {
 
 type Platform = "win" | "macos" | "linux-appimage" | "linux-deb" | "other";
 
-function detectPlatform(name: string): Platform {
+export function detectPlatform(name: string): Platform {
   const n = name.toLowerCase();
   if (n.endsWith(".exe") || n.includes("setup") || n.includes("windows") || n.includes("-win")) return "win";
   if (n.endsWith(".dmg") || n.includes("macos") || n.includes("darwin") || n.endsWith(".app.tar.gz")) return "macos";
@@ -30,7 +30,7 @@ function detectPlatform(name: string): Platform {
   return "other";
 }
 
-async function fetchReleases(): Promise<GitHubRelease[]> {
+export async function fetchReleases(): Promise<GitHubRelease[]> {
   const headers: Record<string, string> = { "User-Agent": "release-stats-script" };
   const token = process.env.GITHUB_TOKEN;
   if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -40,7 +40,7 @@ async function fetchReleases(): Promise<GitHubRelease[]> {
   return res.json() as Promise<GitHubRelease[]>;
 }
 
-function formatDate(iso: string): string {
+export function formatDate(iso: string): string {
   return new Date(iso).toISOString().slice(0, 10);
 }
 
@@ -52,7 +52,7 @@ const EMPTY_COUNTS = (): Record<Platform, number> => ({
   other: 0,
 });
 
-function countReleaseAssets(release: GitHubRelease): Record<Platform, number> {
+export function countReleaseAssets(release: GitHubRelease): Record<Platform, number> {
   const counts = EMPTY_COUNTS();
   for (const asset of release.assets) {
     const p = detectPlatform(asset.name);
@@ -61,7 +61,7 @@ function countReleaseAssets(release: GitHubRelease): Record<Platform, number> {
   return counts;
 }
 
-function printRelease(release: GitHubRelease, counts: Record<Platform, number>): void {
+export function printRelease(release: GitHubRelease, counts: Record<Platform, number>): void {
   const date = formatDate(release.published_at);
   console.log(`\nRelease ${release.tag_name} - ${date}`);
   console.log(`Win - ${counts.win}`);
@@ -70,7 +70,7 @@ function printRelease(release: GitHubRelease, counts: Record<Platform, number>):
   console.log(`Linux deb - ${counts["linux-deb"]}`);
 }
 
-async function main() {
+export async function main() {
   const showAll = process.argv.includes("--all");
   const releases = await fetchReleases();
 
@@ -100,7 +100,9 @@ async function main() {
   console.log(`Total - ${grandTotal}`);
 }
 
-main().catch((err) => {
-  console.error(err.message);
-  process.exit(1);
-});
+if (process.argv[1]?.match(/(?:^|[\\/])release-stats\.(?:ts|js)$/)) {
+  main().catch((err) => {
+    console.error(err.message);
+    process.exit(1);
+  });
+}

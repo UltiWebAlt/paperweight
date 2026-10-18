@@ -77,19 +77,20 @@ Values in the project-root `.env` override shell/IDE environment variables. Rest
 
 Paperweight is configured for the local SonarQube server at
 `http://localhost:9000`, with project key `paperweight`.
-Install the [SonarScanner CLI](https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/sonarscanner),
-set `SONAR_TOKEN` in your environment, then run:
+The official SonarScanner is included as a development dependency; no global
+installation is needed. Install dependencies with `yarn install`, set
+`SONAR_TOKEN` in your environment, then run:
 
 ```sh
-yarn test --coverage --coverageReporters=lcov --runInBand
+yarn test:coverage
 yarn sonar
 ```
 
 Open the [Paperweight dashboard](http://localhost:9000/dashboard?id=paperweight)
 after processing completes. Set `SONAR_HOST_URL` to scan against another server.
-The scan includes the app, analysis engine, scripts, and website; the coverage
-report above covers code exercised by the app's Jest suite. The analysis engine's
-Vitest suite runs separately and is not included in that coverage report.
+The scan includes the app, analysis engine, scripts, and website. Coverage is
+imported from both the app's Jest suite and the analysis engine's Vitest suite.
+Untested production files remain visible in the coverage figures.
 
 ## Contributing
 

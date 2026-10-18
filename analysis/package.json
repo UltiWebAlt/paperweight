@@ -34,6 +34,7 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "analyze": "tsx scripts/analyze.ts",
     "new-fixture": "tsx scripts/new-fixture.ts"
@@ -46,6 +47,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.1.1",
+    "@vitest/coverage-v8": "4.1.10",
     "tsx": "^4.23.1",
     "typescript": "^7.0.2",
     "vite": "^8.1.4",
