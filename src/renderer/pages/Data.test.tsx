@@ -56,6 +56,6 @@ it("refreshes on completed sync and explains an empty mailbox", async () => {
 it("shows a useful error after a failed overview load", async () => {
   const log = jest.spyOn(console, "error").mockImplementation(() => undefined);
   api.getPiiOverview.mockRejectedValueOnce(new Error("Unavailable"));
-  try { setup(); await screen.findByText(/Could not load what was found/); }
+  try { setup(); expect(await screen.findByText(/Could not load what was found/)).toBeTruthy(); }
   finally { log.mockRestore(); }
 });

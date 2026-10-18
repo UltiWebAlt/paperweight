@@ -273,20 +273,6 @@ describe("detectAddressBlocks", () => {
     expect(found.some((f) => f.country === country), text).toBe(true);
   });
 
-  it("accepts an Austrian city whose name is two uppercase letters", () => {
-    const text = "Musterstraße 1, 6883 AU";
-    const postal = detectPostalCodes(text);
-    const found = detectAddressBlocks(text, postal.candidates);
-    expect(found.some((f) => f.country === "AT"), text).toBe(true);
-  });
-
-  it("matches UK number-first streets", () => {
-    const text = "Send to 10 Downing Street, SW1A 2AA, London";
-    const postal = detectPostalCodes(text);
-    const f = detectAddressBlocks(text, postal.candidates)[0]!;
-    expect(f.country).toBe("GB");
-  });
-
   it("never fires on a street without a postcode anchor", () => {
     const text = "We lopen door de Hoofdstraat 12 richting het plein";
     expect(detectAddressBlocks(text, [])).toEqual([]);
@@ -299,28 +285,30 @@ describe("detectAddressBlocks", () => {
     expect(detectAddressBlocks(text, postal.candidates)).toEqual([]);
   });
 
-  it("captures NL house-number suffix and trailing city", () => {
-    const text = "Voorbeeldstraat 12 zw\n1234 XB Voorbeeldstad";
-    const postal = detectPostalCodes(text);
-    const [f] = detectAddressBlocks(text, postal.candidates);
-    expect(f!.valueRaw).toBe("Voorbeeldstraat 12 zw\n1234 XB Voorbeeldstad");
-  });
-
-  it("does not swallow prose words after a house number", () => {
-    const text = "Voorbeeldkamp 88, 4321 JG Voorbeeldstad";
-    const postal = detectPostalCodes(text);
-    const [f] = detectAddressBlocks(text, postal.candidates);
-    expect(f!.valueRaw).toBe("Voorbeeldkamp 88, 4321 JG Voorbeeldstad");
-  });
-
-  it("matches German preposition and suffix streets on anchor-only postcodes", () => {
-    for (const text of ["Am Beispielufer 4, 12345 Musterstadt, Germany", "Musterstrasse 72, 54321 Musterstadt"]) {
+  it.each([
+    { description: "an Austrian city whose name is two uppercase letters", text: "Musterstraße 1, 6883 AU", country: "AT" },
+    { description: "a UK number-first street", text: "Send to 10 Downing Street, SW1A 2AA, London", country: "GB" },
+    { description: "an NL house-number suffix and trailing city", text: "Voorbeeldstraat 12 zw\n1234 XB Voorbeeldstad", value: "Voorbeeldstraat 12 zw\n1234 XB Voorbeeldstad" },
+    { description: "a street without swallowing following prose", text: "Voorbeeldkamp 88, 4321 JG Voorbeeldstad", value: "Voorbeeldkamp 88, 4321 JG Voorbeeldstad" },
+  ] as Array<{ description: string; text: string; country?: string; value?: string }>) (
+    "detects $description",
+    ({ text, country, value }) => {
       const postal = detectPostalCodes(text);
       const found = detectAddressBlocks(text, postal.candidates);
-      const de = found.find((f) => f.country === "DE");
-      expect(de, text).toBeDefined();
-      expect(de!.valueRaw).toContain("Musterstadt");
-    }
+      if (country) expect(found.some((f) => f.country === country), text).toBe(true);
+      if (value) expect(found[0]?.valueRaw).toBe(value);
+    },
+  );
+
+  it.each([
+    "Am Beispielufer 4, 12345 Musterstadt, Germany",
+    "Musterstrasse 72, 54321 Musterstadt",
+  ])("matches German preposition and suffix street: %s", (text) => {
+    const postal = detectPostalCodes(text);
+    const found = detectAddressBlocks(text, postal.candidates);
+    const de = found.find((f) => f.country === "DE");
+    expect(de, text).toBeDefined();
+    expect(de!.valueRaw).toContain("Musterstadt");
   });
 
   it("matches US streets against the state+ZIP anchor", () => {

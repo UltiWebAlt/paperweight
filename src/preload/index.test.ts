@@ -54,5 +54,5 @@ it("routes every exposed API method through the expected IPC bridge", () => {
   }
   expect(invoke.mock.calls.length + send.mock.calls.length + sendSync.mock.calls.length).toBeGreaterThan(60);
   expect(on).toHaveBeenCalled();
-  expect(removeListener.mock.calls.length).toBe(on.mock.calls.length);
+  expect(removeListener.mock.calls).toHaveLength(on.mock.calls.length);
 });

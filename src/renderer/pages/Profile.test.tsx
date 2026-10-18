@@ -23,7 +23,7 @@ beforeEach(() => {
 async function setup(profile = empty) {
   getProfile.mockResolvedValue(profile);
   render(<Profile />);
-  await screen.findByRole("heading", { name: "User Profile" });
+  expect(await screen.findByRole("heading", { name: "User Profile" })).toBeTruthy();
 }
 const section = (name: string) => within(screen.getByRole("heading", { name }).closest<HTMLElement>("section")!);
 const change = (label: string, value: string) => fireEvent.change(screen.getByLabelText(label, { exact: true }), { target: { value } });
@@ -125,5 +125,5 @@ it("recovers from a failed profile load", async () => {
   getProfile.mockRejectedValueOnce(new Error("Unavailable")).mockResolvedValue(empty);
   render(<Profile />);
   fireEvent.click(await screen.findByRole("button", { name: "Try again" }));
-  await screen.findByRole("heading", { name: "User Profile" });
+  await waitFor(() => expect(getProfile).toHaveBeenCalledTimes(2));
 });

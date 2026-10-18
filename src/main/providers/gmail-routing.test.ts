@@ -23,7 +23,7 @@ beforeEach(() => {
   jest.spyOn(globalThis, "fetch").mockImplementation(mockFetch);
   mockFetch.mockImplementation(async () => {
     // Every actual network request must have entered the pacing gate first.
-    expect(mockGate.mock.calls.length).toBe(mockFetch.mock.calls.length);
+    expect(mockGate.mock.calls).toHaveLength(mockFetch.mock.calls.length);
     return new Response(JSON.stringify({ emailAddress: "test@example.com", resultSizeEstimate: 0 }));
   });
 });

@@ -36,6 +36,6 @@ it("refreshes on sync completion and renders the empty state", async () => {
   await screen.findByText("Acme");
   api.queryGdprCases.mockResolvedValueOnce([]);
   syncDone({ running: false });
-  await screen.findByText(/No cases yet/);
+  expect(await screen.findByText(/No cases yet/)).toBeTruthy();
   view.unmount();
 });
