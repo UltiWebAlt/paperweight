@@ -6,6 +6,7 @@
   "author": "wslyvh",
   "main": "./out/main/index.js",
   "scripts": {
+    "sonar": "sonar-scanner",
     "postinstall": "yarn --cwd analysis install && electron-rebuild -f -w better-sqlite3",
     "dev": "electron-vite dev",
     "dev:local": "tsx scripts/dev-local.ts",

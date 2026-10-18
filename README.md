@@ -73,6 +73,24 @@ Values in the project-root `.env` override shell/IDE environment variables. Rest
 - API permissions → Microsoft Graph → Delegated → add `User.Read`, `Mail.ReadWrite`, `Mail.Send`, `offline_access`, `openid`, `profile`
 - Set `MICROSOFT_CLIENT_ID` (no secret — we use PKCE)
 
+## SonarQube
+
+Paperweight is configured for the local SonarQube server at
+`http://localhost:9000`, with project key `paperweight`.
+Install the [SonarScanner CLI](https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/scanners/sonarscanner),
+set `SONAR_TOKEN` in your environment, then run:
+
+```sh
+yarn test --coverage --coverageReporters=lcov --runInBand
+yarn sonar
+```
+
+Open the [Paperweight dashboard](http://localhost:9000/dashboard?id=paperweight)
+after processing completes. Set `SONAR_HOST_URL` to scan against another server.
+The scan includes the app, analysis engine, scripts, and website; the coverage
+report above covers code exercised by the app's Jest suite. The analysis engine's
+Vitest suite runs separately and is not included in that coverage report.
+
 ## Contributing
 
 Feedback, bug reports, and PRs are welcome.

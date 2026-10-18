@@ -3,6 +3,7 @@ out/
 dist/
 .next/
 coverage/
+.scannerwork/
 *.log
 .DS_Store
 
