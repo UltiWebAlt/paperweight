@@ -6,9 +6,17 @@ jest.mock("../utils/log", () => {
 
 import { getDb, initDb } from "../db";
 import {
+  deleteVendor,
   enrichVendorCategories,
+  findOrCreateVendor,
+  getVendorDetail,
+  getVendorDomain,
+  matchVendorCompanies,
   queryVendors,
+  recomputeAllVendorFlags,
+  updateVendor,
   updateVendorFlags,
+  updateVendorStats,
 } from "./vendors";
 import type { PiiType } from "@shared/types";
 
@@ -64,7 +72,10 @@ beforeAll(() => {
     ATTACH DATABASE ':memory:' AS companies;
     CREATE TABLE companies.companies (
       slug TEXT PRIMARY KEY,
-      categories TEXT
+      name TEXT,
+      runs TEXT,
+      categories TEXT,
+      domains TEXT
     );
   `);
 });
@@ -377,6 +388,96 @@ describe("vendor risk policy", () => {
       "medium.example",
       "low.example",
     ]);
+  });
+});
+
+describe("vendor persistence and grouping helpers", () => {
+  it.each([
+    ["news@example.co.uk", "example.co.uk"],
+    ["WEEKLY@SUBSTACK.COM", "weekly.substack.com"],
+    ["writer@beehiiv.com", "writer.beehiiv.com"],
+    ["support@netlify.zendesk.com", "netlify.zendesk.com"],
+    ["nftplayground@calendar.luma-mail.com", "nftplayground.calendar.luma-mail.com"],
+    ["noreply@calendar.luma-mail.com", "noreply.calendar.luma-mail.com"],
+    ["not-an-email", "not-an-email"],
+  ])("groups %s as %s", (sender, expected) => {
+    expect(getVendorDomain(sender)).toBe(expected);
+  });
+
+  it("reuses existing vendors, infers new names, and attaches catalogue matches", () => {
+    const existing = insertVendor("existing.example");
+    expect(findOrCreateVendor("existing.example")).toBe(existing);
+    expect(findOrCreateVendor("new.example")).toBeTruthy();
+    getDb().prepare(
+      "INSERT INTO companies.companies (slug, name, categories, domains) VALUES (?, ?, ?, ?)",
+    ).run("catalogue", "Catalogue Co", '["finance"]', "catalogue.example");
+    const id = findOrCreateVendor("catalogue.example");
+    expect(getDb().prepare("SELECT company_slug, name FROM vendors WHERE id = ?").get(id)).toEqual({ company_slug: "catalogue", name: "Catalogue Co" });
+  });
+
+  it("recomputes message stats and only replaces inferred names", () => {
+    const id = insertVendor("stats.example");
+    const statement = getDb().prepare("INSERT INTO messages (id, vendor_id, sender_email, sender_name, date, type) VALUES (?, ?, ?, ?, ?, ?)");
+    statement.run("newer", id, "alerts@stats.example", "Alerts", 2000, "update");
+    statement.run("older", id, "news@stats.example", "Newsletter", 1000, "promotion");
+    updateVendorStats(id);
+    expect(getDb().prepare("SELECT message_count, sender_count, first_seen, last_seen, name FROM vendors WHERE id = ?").get(id)).toEqual({ message_count: 2, sender_count: 2, first_seen: 1000, last_seen: 2000, name: "Newsletter" });
+
+    getDb().prepare("UPDATE vendors SET company_slug = 'known', name = 'Known Co' WHERE id = ?").run(id);
+    updateVendorStats(id);
+    expect((getDb().prepare("SELECT name FROM vendors WHERE id = ?").get(id) as { name: string }).name).toBe("Known Co");
+  });
+
+  it("updates individual flags and recomputes them for all populated vendors", () => {
+    const list = insertVendor("list.example");
+    const account = insertVendor("account.example");
+    insertMsg("list-message", list, "list.example", "promotion");
+    getDb().prepare("UPDATE messages SET unsubscribe_method = 'rfc8058', unsubscribe_url = ? WHERE id = ?").run("https://list.example/unsub", "list-message");
+    insertMsg("account-message", account, "account.example", "purchase");
+    updateVendorFlags(list);
+    recomputeAllVendorFlags();
+    expect(getDb().prepare("SELECT has_marketing, has_account FROM vendors WHERE id = ?").get(list)).toEqual({ has_marketing: 1, has_account: 0 });
+    expect(getDb().prepare("SELECT has_marketing, has_account FROM vendors WHERE id = ?").get(account)).toEqual({ has_marketing: 0, has_account: 1 });
+  });
+
+  it("matches company domains and names while skipping personal domains", () => {
+    getDb().prepare("INSERT INTO companies.companies (slug, name, runs, domains) VALUES (?, ?, ?, ?)").run("by-domain", "By Domain Co", "[]", "domain.example");
+    getDb().prepare("INSERT INTO companies.companies (slug, name, runs, domains) VALUES (?, ?, ?, ?)").run("by-name", "Acme Services", '["Acme"]', "");
+    const domainId = insertVendor("domain.example");
+    const nameId = insertVendor("acme.example");
+    const personalId = insertVendor("gmail.com");
+    getDb().prepare("UPDATE vendors SET name = 'Acme' WHERE id = ?").run(nameId);
+    matchVendorCompanies();
+    expect((getDb().prepare("SELECT company_slug FROM vendors WHERE id = ?").get(domainId) as { company_slug: string }).company_slug).toBe("by-domain");
+    expect((getDb().prepare("SELECT company_slug FROM vendors WHERE id = ?").get(nameId) as { company_slug: string }).company_slug).toBe("by-name");
+    expect((getDb().prepare("SELECT company_slug FROM vendors WHERE id = ?").get(personalId) as { company_slug: string | null }).company_slug).toBeNull();
+  });
+
+  it("enriches catalogue categories and safely falls back on malformed metadata", () => {
+    getDb().prepare("INSERT INTO companies.companies (slug, name, categories, domains) VALUES (?, ?, ?, ?)").run("health", "Health Co", '["health", "finance"]', "health.example");
+    const healthId = insertVendor("health.example");
+    const invalidId = insertVendor("invalid.example");
+    getDb().prepare("UPDATE vendors SET company_slug = 'health' WHERE id = ?").run(healthId);
+    getDb().prepare("INSERT INTO companies.companies (slug, name, categories, domains) VALUES (?, ?, ?, ?)").run("invalid", "Invalid", "{", "invalid.example");
+    getDb().prepare("UPDATE vendors SET company_slug = 'invalid' WHERE id = ?").run(invalidId);
+    enrichVendorCategories();
+    expect(getDb().prepare("SELECT category_id, risk_level FROM vendors WHERE id = ?").get(healthId)).toEqual({ category_id: "healthcare", risk_level: "high" });
+    expect(getDb().prepare("SELECT category_id FROM vendors WHERE id = ?").get(invalidId)).toEqual({ category_id: "unknown" });
+  });
+
+  it("updates or deletes vendors and returns a populated detail record", () => {
+    const id = insertVendor("detail.example");
+    insertMsg("detail-message", id, "detail.example");
+    updateVendor(id, { status: "reviewed", account_email: "  me@example.test  " });
+    const detail = getVendorDetail("detail.example");
+    expect(detail.vendor.status).toBe("reviewed");
+    expect(detail.vendor.account_email).toBe("me@example.test");
+    expect(detail.allMessages).toHaveLength(1);
+    expect(detail.senders).toHaveLength(1);
+    expect(detail.activityLog).toEqual([]);
+    updateVendor(id, {});
+    deleteVendor(id);
+    expect(() => getVendorDetail("detail.example")).toThrow("Vendor not found");
   });
 });
 
