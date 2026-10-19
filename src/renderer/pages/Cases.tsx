@@ -9,9 +9,9 @@ function PagerControls({
   totalPages,
   onChange,
 }: {
-  page: number;
-  totalPages: number;
-  onChange: (page: number) => void;
+  readonly page: number;
+  readonly totalPages: number;
+  readonly onChange: (page: number) => void;
 }): JSX.Element {
   return (
     <>

@@ -19,10 +19,10 @@
  * Run via: yarn seed:test-account
  * Then switch to "test-cases@paperweight.local" from the account switcher.
  */
-import { existsSync, readFileSync, rmSync, writeFileSync } from "fs";
-import { randomBytes } from "crypto";
-import { homedir } from "os";
-import { join } from "path";
+import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { randomBytes } from "node:crypto";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { createAccountDb, initDb, getDb } from "../src/main/db";
 import { emailToFileKey } from "../src/main/credentials";
 import { saveGlobalSetting } from "../src/main/services/globalSettings";

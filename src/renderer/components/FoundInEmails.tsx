@@ -14,14 +14,14 @@ const PAGE_SIZE = 25;
 type FindingTab = FindingConfidence | "suppressed";
 
 interface FoundInEmailsProps {
-  vendorId: number;
-  vendorName: string;
+  readonly vendorId: number;
+  readonly vendorName: string;
 }
 
 interface FindingPaginationProps {
-  page: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
+  readonly page: number;
+  readonly totalPages: number;
+  readonly onPageChange: (page: number) => void;
 }
 
 function FindingPagination({

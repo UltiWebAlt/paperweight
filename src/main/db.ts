@@ -6,8 +6,8 @@
 // here (e.g. ./migrations for migrateActionLog) must itself keep its top-level
 // graph light for the same reason.
 import Database from "better-sqlite3";
-import { join, basename, dirname } from "path";
-import { existsSync, unlinkSync } from "fs";
+import { join, basename, dirname } from "node:path";
+import { existsSync, unlinkSync } from "node:fs";
 import { dbLog } from "./utils/log";
 import { emailToFileKey } from "./credentials";
 import { attachGlobalDb, configureGlobalDbPath } from "./globalDb";

@@ -47,7 +47,7 @@ async function fetchLogo(logoPath: string | undefined): Promise<string | null> {
 export default async function Image({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  readonly params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
   const model = getBreachPageModel(slug);

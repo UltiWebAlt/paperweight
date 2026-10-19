@@ -2,13 +2,13 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 
 interface ActionCardProps {
-  icon: ReactNode;
-  title: string;
-  description: ReactNode;
-  href?: string;
-  tone?: "primary" | "accent";
-  className?: string;
-  children?: ReactNode;
+  readonly icon: ReactNode;
+  readonly title: string;
+  readonly description: ReactNode;
+  readonly href?: string;
+  readonly tone?: "primary" | "accent";
+  readonly className?: string;
+  readonly children?: ReactNode;
 }
 
 const TONE_CLASSES = {

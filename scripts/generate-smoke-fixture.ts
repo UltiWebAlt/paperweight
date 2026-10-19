@@ -2,9 +2,9 @@
  * Populate a userData directory with a minimal registered account for smoke tests.
  * Run via: cross-env ELECTRON_RUN_AS_NODE=1 electron --import tsx scripts/generate-smoke-fixture.ts <userDataDir>
  */
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
-import { randomBytes } from "crypto";
-import { join } from "path";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { randomBytes } from "node:crypto";
+import { join } from "node:path";
 import { createAccountDb, initDb } from "../src/main/db";
 import { emailToFileKey } from "../src/main/credentials";
 

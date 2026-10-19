@@ -3,9 +3,9 @@ import {
   mkdtempSync,
   rmSync,
   writeFileSync,
-} from "fs";
-import { tmpdir } from "os";
-import { join } from "path";
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import type { ProfileBirthDate, UserProfile } from "@shared/types";
 
 let userDataDir = "";

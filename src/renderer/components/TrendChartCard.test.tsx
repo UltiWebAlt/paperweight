@@ -3,10 +3,10 @@ import { render, screen } from "@testing-library/react";
 import TrendChart from "./TrendChartCard";
 
 jest.mock("recharts", () => ({
-  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  LineChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  Line: ({ activeDot }: { activeDot: (p: { cx?: number; cy?: number; value?: number }) => React.ReactNode }) => <>{activeDot({ cx: 1, cy: 2, value: 9 })}</>,
-  XAxis: ({ tickFormatter }: { tickFormatter: (label: string) => string }) => <span>{tickFormatter("2025-01-01")}</span>,
+  ResponsiveContainer: ({ children }: { readonly children: React.ReactNode }) => <div>{children}</div>,
+  LineChart: ({ children }: { readonly children: React.ReactNode }) => <div>{children}</div>,
+  Line: ({ activeDot }: { readonly activeDot: (p: { cx?: number; cy?: number; value?: number }) => React.ReactNode }) => <>{activeDot({ cx: 1, cy: 2, value: 9 })}</>,
+  XAxis: ({ tickFormatter }: { readonly tickFormatter: (label: string) => string }) => <span>{tickFormatter("2025-01-01")}</span>,
   YAxis: () => null,
 }));
 

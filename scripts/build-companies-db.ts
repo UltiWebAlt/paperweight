@@ -14,9 +14,9 @@ import {
   readFileSync,
   unlinkSync,
   writeFileSync,
-} from "fs";
-import { join, resolve } from "path";
-import { fileURLToPath } from "url";
+} from "node:fs";
+import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = join(fileURLToPath(import.meta.url), "..");
 const ROOT = resolve(__dirname, "..");
@@ -95,7 +95,7 @@ function mapCategories(sourceCategories?: string[]): string[] {
 
 function escSql(str: string | null | undefined): string {
   if (str == null) return "NULL";
-  return "'" + String(str).replace(/'/g, "''") + "'";
+  return "'" + String(str).replaceAll("'", "''") + "'";
 }
 
 function extractDomains(company: CompanyJson): string[] {

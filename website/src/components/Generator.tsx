@@ -16,8 +16,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 interface GeneratorProps {
-  initialState?: GdprGeneratorInitialState;
-  initialAction?: GdprRequestAction;
+  readonly initialState?: GdprGeneratorInitialState;
+  readonly initialAction?: GdprRequestAction;
 }
 
 export function Generator({ initialState, initialAction }: GeneratorProps) {

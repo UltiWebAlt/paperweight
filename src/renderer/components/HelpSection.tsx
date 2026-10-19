@@ -1,6 +1,6 @@
 interface HelpSectionProps {
   /** Use card styling (Support page) vs plain (modal) */
-  variant?: "card" | "plain";
+  readonly variant?: "card" | "plain";
 }
 
 export default function HelpSection({

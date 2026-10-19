@@ -1,6 +1,6 @@
-import { join } from "path";
-import { createHash } from "crypto";
-import { existsSync, readFileSync, writeFileSync, unlinkSync } from "fs";
+import { join } from "node:path";
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync, writeFileSync, unlinkSync } from "node:fs";
 
 import { getGlobalSetting, saveGlobalSetting } from "./services/globalSettings";
 

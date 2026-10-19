@@ -1,4 +1,4 @@
-export function GoogleLogo({ className = "w-5 h-5" }: { className?: string }) {
+export function GoogleLogo({ className = "w-5 h-5" }: { readonly className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
       <path
@@ -21,7 +21,7 @@ export function GoogleLogo({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
-export function MicrosoftLogo({ className = "w-5 h-5" }: { className?: string }) {
+export function MicrosoftLogo({ className = "w-5 h-5" }: { readonly className?: string }) {
   return (
     <svg viewBox="0 0 21 21" className={className} aria-hidden="true">
       <rect x="1" y="1" width="9" height="9" fill="#f25022" />
@@ -32,7 +32,7 @@ export function MicrosoftLogo({ className = "w-5 h-5" }: { className?: string })
   );
 }
 
-export function AppleLogo({ className = "w-5 h-5 fill-current" }: { className?: string }) {
+export function AppleLogo({ className = "w-5 h-5 fill-current" }: { readonly className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
       <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
@@ -40,7 +40,7 @@ export function AppleLogo({ className = "w-5 h-5 fill-current" }: { className?: 
   );
 }
 
-export function ProtonLogo({ className = "w-4 h-4" }: { className?: string }) {
+export function ProtonLogo({ className = "w-4 h-4" }: { readonly className?: string }) {
   return (
     <svg viewBox="0 0 36 36" className={className} fill="none" aria-hidden="true">
       <path fillRule="evenodd" clipRule="evenodd" d="M1 16.8C1 7.52162 8.52162 0 17.8 0C27.0784 0 34.6 7.52162 34.6 16.8V33C34.6 34.6569 33.2569 36 31.6 36H27.4L4.6 32.4L1 18V16.8ZM27.4 16.8C27.4 11.4981 23.1019 7.2 17.8 7.2C12.4981 7.2 8.2 11.4981 8.2 16.8L15.4294 23.1257C16.7867 24.3133 18.8133 24.3133 20.1706 23.1257L24.9853 22.3629L27.4 16.8Z" fill="url(#proton-grad0)" />

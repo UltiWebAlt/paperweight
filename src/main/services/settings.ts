@@ -1,5 +1,5 @@
-import { join } from "path";
-import { writeFileSync, readFileSync, unlinkSync, mkdirSync, existsSync } from "fs";
+import { join } from "node:path";
+import { writeFileSync, readFileSync, unlinkSync, mkdirSync, existsSync } from "node:fs";
 import { getDb } from "../db";
 import { APP_CONFIG } from "@shared/config";
 import type { WhitelistEntry, LicenseStatus } from "@shared/types";

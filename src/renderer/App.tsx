@@ -18,7 +18,7 @@ import Settings from "./pages/Settings";
 import Support from "./pages/Support";
 import Activity from "./pages/Activity";
 
-function AuthGate({ children }: { children: React.ReactNode }): JSX.Element {
+function AuthGate({ children }: { readonly children: React.ReactNode }): JSX.Element {
   const [state, setState] = useState<{
     connected?: boolean;
     license?: LicenseStatus;

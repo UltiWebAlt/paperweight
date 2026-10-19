@@ -297,7 +297,7 @@ export function getDashboardTrend(): ChartTrend {
 
   const startedUsingAtRaw = getSetting("registeredAt");
   const startedUsingAt =
-    (startedUsingAtRaw ? parseInt(startedUsingAtRaw, 10) : 0) || undefined;
+    (startedUsingAtRaw ? Number.parseInt(startedUsingAtRaw, 10) : 0) || undefined;
 
   const startDay = toUtcDayString(startDayStart);
   const endDay = toUtcDayString(endDayStart);

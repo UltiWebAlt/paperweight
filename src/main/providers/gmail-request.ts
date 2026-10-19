@@ -1,4 +1,4 @@
-import { randomInt } from "crypto";
+import { randomInt } from "node:crypto";
 import { syncLog } from "../utils/log";
 import { getGlobalDb } from "../globalDb";
 import { createGmailPacingStore } from "./gmail-pacing";

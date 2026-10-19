@@ -239,7 +239,7 @@ function parseEmailAddress(raw: string): { name: string; email: string } {
 }
 
 function base64UrlDecode(str: string): string {
-  const padded = str.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = str.replaceAll("-", "+").replaceAll("_", "/");
   return Buffer.from(padded, "base64").toString("utf-8");
 }
 
@@ -325,7 +325,7 @@ async function parseGmailMessage(
     maxTextLength: BODY_TEXT_MAX_LENGTH,
   });
 
-  const internalDate = parseInt(msg.internalDate, 10);
+  const internalDate = Number.parseInt(msg.internalDate, 10);
   const date = !isNaN(internalDate)
     ? internalDate
     : (() => {

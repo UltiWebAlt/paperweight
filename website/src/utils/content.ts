@@ -1,5 +1,5 @@
-import { readFileSync, readdirSync, existsSync } from "fs";
-import { join } from "path";
+import { readFileSync, readdirSync, existsSync } from "node:fs";
+import { join } from "node:path";
 
 const CONTENT_DIR = join(process.cwd(), "src", "content", "breaches");
 

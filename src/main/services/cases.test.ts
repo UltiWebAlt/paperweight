@@ -1,7 +1,7 @@
 import Database from "better-sqlite3";
-import { join } from "path";
-import { tmpdir } from "os";
-import { existsSync, unlinkSync } from "fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { existsSync, unlinkSync } from "node:fs";
 
 jest.mock("../utils/log", () => ({
   dbLog: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },

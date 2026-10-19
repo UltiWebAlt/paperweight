@@ -1,6 +1,6 @@
 import Database from "better-sqlite3";
-import { existsSync, readFileSync, unlinkSync } from "fs";
-import { dirname, join } from "path";
+import { existsSync, readFileSync, unlinkSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { dbLog } from "./utils/log";
 
 let db: Database.Database | undefined;

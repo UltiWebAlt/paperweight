@@ -1,7 +1,7 @@
-import { mkdirSync } from "fs";
-import { tmpdir } from "os";
-import { isAbsolute, join } from "path";
-import { execFileSync, spawn } from "child_process";
+import { mkdirSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { isAbsolute, join } from "node:path";
+import { execFileSync, spawn } from "node:child_process";
 
 const root = process.cwd();
 const userDataDir = join(tmpdir(), "paperweight-local");

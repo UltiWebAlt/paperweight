@@ -60,7 +60,7 @@ function parseImapUid(messageId: string): number {
   // Message IDs are stored as "imap-{uid}" — uid is unique within the scanned mailbox.
   const match = messageId.match(/^imap-(\d+)$/);
   if (!match) throw new Error(`Invalid IMAP message ID: ${messageId}`);
-  return parseInt(match[1], 10);
+  return Number.parseInt(match[1], 10);
 }
 
 // mailparser 3.x groups ALL List-* headers (List-Unsubscribe, List-Id, etc.)

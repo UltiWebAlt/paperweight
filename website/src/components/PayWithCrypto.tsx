@@ -23,32 +23,32 @@ export interface PayWithCryptoPricing {
 }
 
 interface PayWithCryptoPanelProps {
-  pricing: PayWithCryptoPricing;
-  supportEmail?: string;
-  showHeader?: boolean;
-  className?: string;
+  readonly pricing: PayWithCryptoPricing;
+  readonly supportEmail?: string;
+  readonly showHeader?: boolean;
+  readonly className?: string;
 }
 
 interface PayWithCryptoDialogProps extends PayWithCryptoPanelProps {
-  open: boolean;
-  onClose: () => void;
+  readonly open: boolean;
+  readonly onClose: () => void;
 }
 
 interface PayWithCryptoButtonProps {
-  pricing: PayWithCryptoPricing;
-  supportEmail?: string;
-  className?: string;
-  children: ReactNode;
+  readonly pricing: PayWithCryptoPricing;
+  readonly supportEmail?: string;
+  readonly className?: string;
+  readonly children: ReactNode;
 }
 
 interface PaymentPanelContentProps {
-  description: ReactNode;
-  address: string;
-  symbol: string;
-  loading: boolean;
-  amount?: string;
-  spotPrice?: number;
-  footnote?: ReactNode;
+  readonly description: ReactNode;
+  readonly address: string;
+  readonly symbol: string;
+  readonly loading: boolean;
+  readonly amount?: string;
+  readonly spotPrice?: number;
+  readonly footnote?: ReactNode;
 }
 
 function formatUsd(value: number) {
@@ -60,7 +60,7 @@ function formatUsd(value: number) {
   });
 }
 
-function CopyIconButton(props: { value: string; label: string }) {
+function CopyIconButton(props: { readonly value: string; readonly label: string }) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -85,7 +85,7 @@ function CopyIconButton(props: { value: string; label: string }) {
   );
 }
 
-function CopyField(props: { value: string; displayValue?: string; label: string }) {
+function CopyField(props: { readonly value: string; readonly displayValue?: string; readonly label: string }) {
   const display = props.displayValue ?? props.value;
 
   return (
@@ -219,10 +219,10 @@ function getPaymentContent(
 }
 
 function PaymentSelector(props: {
-  priceUsd: number;
-  loading: boolean;
-  quote: (usd: number, coin: CoinId) => string | undefined;
-  prices: CoinPrices | null;
+  readonly priceUsd: number;
+  readonly loading: boolean;
+  readonly quote: (usd: number, coin: CoinId) => string | undefined;
+  readonly prices: CoinPrices | null;
 }) {
   const [activeCoin, setActiveCoin] = useState<PaymentCoinId>("ethereum");
   const content = getPaymentContent(

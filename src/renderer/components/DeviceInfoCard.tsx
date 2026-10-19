@@ -1,9 +1,9 @@
 import type { SupportInfo } from "@shared/types";
 
 interface DeviceInfoCardProps {
-  info?: SupportInfo;
+  readonly info?: SupportInfo;
   /** Use card styling (Support page) vs plain (modal) */
-  variant?: "card" | "plain";
+  readonly variant?: "card" | "plain";
 }
 
 export default function DeviceInfoCard({

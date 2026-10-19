@@ -1,5 +1,5 @@
-import { readFileSync } from "fs";
-import { join } from "path";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 // Guards the db.ts INVARIANT (see the comment atop db.ts): db.ts is loaded very
 // early and by nearly everything, including during the account-connect DB swap,

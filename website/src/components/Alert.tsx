@@ -7,14 +7,14 @@ import { useMemo, useState } from "react";
 export type AlertTone = "success" | "error" | "warning" | "info";
 
 interface AlertProps {
-  tone: AlertTone;
-  title?: string;
-  message: ReactNode;
-  actions?: ReactNode;
-  icon?: ReactNode;
-  dismissable?: boolean;
-  onDismiss?: () => void;
-  className?: string;
+  readonly tone: AlertTone;
+  readonly title?: string;
+  readonly message: ReactNode;
+  readonly actions?: ReactNode;
+  readonly icon?: ReactNode;
+  readonly dismissable?: boolean;
+  readonly onDismiss?: () => void;
+  readonly className?: string;
 }
 
 function getToneClassName(tone: AlertTone) {

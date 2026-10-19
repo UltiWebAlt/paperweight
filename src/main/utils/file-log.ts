@@ -2,8 +2,8 @@
  * Owns the main log path so IPC can expose it for support diagnostics.
  */
 
-import { mkdirSync } from "fs";
-import { dirname } from "path";
+import { mkdirSync } from "node:fs";
+import { dirname } from "node:path";
 
 let logPath: string | null = null;
 

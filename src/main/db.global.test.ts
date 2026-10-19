@@ -2,9 +2,9 @@ import {
   mkdirSync,
   mkdtempSync,
   rmSync,
-} from "fs";
-import { tmpdir } from "os";
-import { join } from "path";
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 let userDataDir = "";
 

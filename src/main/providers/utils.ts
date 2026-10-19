@@ -51,7 +51,7 @@ export function friendlyConnectionError(err: unknown): string {
 //   to the renderer (IPC.authUrl) so it can offer copy/open affordances on either path.
 
 function escapeHtml(str: string): string {
-  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return str.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
 }
 
 export function runLoopbackAuth(

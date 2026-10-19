@@ -1,10 +1,10 @@
 interface FilterGroupProps {
-  label: string;
-  options: string[];
-  labels: string[];
-  value: string;
-  onChange: (val: string) => void;
-  colors?: string[];
+  readonly label: string;
+  readonly options: string[];
+  readonly labels: string[];
+  readonly value: string;
+  readonly onChange: (val: string) => void;
+  readonly colors?: string[];
 }
 
 // One labelled row of toggle badges inside a filter dropdown. Clicking the
@@ -23,13 +23,10 @@ export default function FilterGroup({
       <div className="flex gap-1 flex-wrap">
         {options.map((opt, i) => {
           const color = colors?.[i];
+          const selected = value === opt;
           const cls = color
-            ? value === opt
-              ? `badge-${color}`
-              : `badge-soft badge-${color}`
-            : value === opt
-              ? "badge-neutral"
-              : "badge-soft";
+            ? `badge-${color}${selected ? "" : " badge-soft"}`
+            : selected ? "badge-neutral" : "badge-soft";
           return (
             <button
               key={opt}

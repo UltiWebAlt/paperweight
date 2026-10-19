@@ -13,7 +13,7 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  readonly params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
   const guide = GetGuide(slug);
@@ -31,7 +31,7 @@ export async function generateMetadata({
 export default async function Page({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  readonly params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
   const guide = GetGuide(slug);

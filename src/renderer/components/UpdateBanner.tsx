@@ -1,8 +1,8 @@
 import type { UpdateInfo } from "@shared/ipc";
 
 interface UpdateBannerProps {
-  info: UpdateInfo | null;
-  onDismiss: () => void;
+  readonly info: UpdateInfo | null;
+  readonly onDismiss: () => void;
 }
 
 export default function UpdateBanner({ info, onDismiss }: UpdateBannerProps): JSX.Element | null {

@@ -21,7 +21,7 @@ type PiiListMode = "active" | "suppressed";
 // The value's factual signals. The company count is the number of distinct
 // companies holding this exact value, which is what expanding the row lists.
 interface PiiValueBadgesProps {
-  value: PiiValue;
+  readonly value: PiiValue;
 }
 
 function PiiValueBadges({ value }: PiiValueBadgesProps): JSX.Element | null {
@@ -41,15 +41,15 @@ function PiiValueBadges({ value }: PiiValueBadgesProps): JSX.Element | null {
 }
 
 interface PiiValueListProps {
-  values: PiiValue[];
+  readonly values: PiiValue[];
   /** Full values, present only while the surface's reveal toggle is on. */
-  revealed?: Map<number, string>;
-  busy: boolean;
-  mode?: PiiListMode;
+  readonly revealed?: Map<number, string>;
+  readonly busy: boolean;
+  readonly mode?: PiiListMode;
   /** Add reviewed values to the global profile. */
-  onConfirm: (values: PiiValue[]) => void | Promise<void>;
+  readonly onConfirm: (values: PiiValue[]) => void | Promise<void>;
   /** Mark active values `Not mine`. Suppressed lists only offer confirmation. */
-  onSuppress?: (values: PiiValue[]) => void | Promise<void>;
+  readonly onSuppress?: (values: PiiValue[]) => void | Promise<void>;
 }
 
 export default function PiiValueList({

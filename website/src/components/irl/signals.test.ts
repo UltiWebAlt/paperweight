@@ -1,7 +1,7 @@
 /** @jest-environment jsdom */
 import { collectClientSignals } from "./signals";
-import { TextEncoder } from "util";
-import { webcrypto } from "crypto";
+import { TextEncoder } from "node:util";
+import { webcrypto } from "node:crypto";
 
 beforeEach(() => {
   Object.defineProperty(globalThis, "TextEncoder", { configurable: true, value: TextEncoder });

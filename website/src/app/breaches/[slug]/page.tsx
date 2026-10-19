@@ -15,10 +15,10 @@ import { parseMarkdown } from "@/utils/markdown";
 import { buildMetadata } from "@/utils/seo";
 
 interface InfoRowProps {
-  label: string;
-  value: ReactNode;
-  valueClassName?: string;
-  valueTitle?: string;
+  readonly label: string;
+  readonly value: ReactNode;
+  readonly valueClassName?: string;
+  readonly valueTitle?: string;
 }
 
 function InfoRow({ label, value, valueClassName, valueTitle }: InfoRowProps) {
@@ -44,7 +44,7 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  readonly params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
   const model = getBreachPageModel(slug);
@@ -63,7 +63,7 @@ export async function generateMetadata({
 export default async function BreachPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  readonly params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
   const model = getBreachPageModel(slug);

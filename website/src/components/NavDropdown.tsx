@@ -5,9 +5,9 @@ import { useEffect, useRef } from "react";
 import type { NavLinkItem } from "@/utils/nav";
 
 interface NavDropdownProps {
-  label: string;
-  href?: string;
-  links: NavLinkItem[];
+  readonly label: string;
+  readonly href?: string;
+  readonly links: NavLinkItem[];
 }
 
 export function NavDropdown({ label, href, links }: NavDropdownProps) {

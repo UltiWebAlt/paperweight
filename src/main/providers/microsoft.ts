@@ -175,7 +175,7 @@ const GRAPH_MAX_RETRIES = 4;
 function retryDelayMs(response: Response, attempt: number): number {
   const retryAfter = response.headers.get("Retry-After");
   if (retryAfter) {
-    const seconds = parseInt(retryAfter, 10);
+    const seconds = Number.parseInt(retryAfter, 10);
     if (!isNaN(seconds)) return seconds * 1000;
   }
   return Math.min(2 ** attempt * 1000, 30_000);

@@ -103,12 +103,12 @@ interface PaymentDraft {
 }
 
 interface ProfileRowProps {
-  value: string;
-  meta?: string;
-  monospace?: boolean;
-  badge?: string;
-  onEdit?: () => void;
-  onRemove?: () => void;
+  readonly value: string;
+  readonly meta?: string;
+  readonly monospace?: boolean;
+  readonly badge?: string;
+  readonly onEdit?: () => void;
+  readonly onRemove?: () => void;
 }
 
 const EMPTY_NAME: NameDraft = {

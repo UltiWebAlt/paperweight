@@ -85,8 +85,8 @@ function EmailsBySender({
   messages,
   senderCount,
 }: {
-  messages: Message[];
-  senderCount: number;
+  readonly messages: Message[];
+  readonly senderCount: number;
 }) {
   const grouped = new Map<string, typeof messages>();
   for (const msg of messages) {
@@ -167,16 +167,16 @@ function unsubDescription(
 }
 
 function ActionTaskRow({ index, label, description, done, spinning, anyLoading, onAction, actionLabel, onMarkDone, variant }: {
-  index: number;
-  label: string;
-  description?: string;
-  done: boolean;
-  spinning: boolean;
-  anyLoading: boolean;
-  onAction: () => void;
-  actionLabel: string;
-  onMarkDone?: () => void;
-  variant?: "warning";
+  readonly index: number;
+  readonly label: string;
+  readonly description?: string;
+  readonly done: boolean;
+  readonly spinning: boolean;
+  readonly anyLoading: boolean;
+  readonly onAction: () => void;
+  readonly actionLabel: string;
+  readonly onMarkDone?: () => void;
+  readonly variant?: "warning";
 }) {
   return (
     <div className={`flex items-start gap-3 py-2.5 border-b border-base-200 last:border-0 transition-opacity ${done ? "opacity-40" : ""}`}>
@@ -215,10 +215,10 @@ function WhitelistSection({
   isLoading,
   onRemove,
 }: {
-  title: string;
-  entries: WhitelistEntry[];
-  isLoading: boolean;
-  onRemove: (value: string) => void;
+  readonly title: string;
+  readonly entries: WhitelistEntry[];
+  readonly isLoading: boolean;
+  readonly onRemove: (value: string) => void;
 }): JSX.Element | null {
   if (entries.length === 0) return null;
 

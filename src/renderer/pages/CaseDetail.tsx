@@ -133,10 +133,10 @@ const BADGE_LABELS: Record<NonNullable<CommunicationItem["badge"]>, string> = {
 };
 
 interface CommunicationRowProps {
-  item: CommunicationItem;
-  caseActive?: boolean;
-  linkLoading?: boolean;
-  onToggleLink?: (messageId: string, linked: boolean) => void;
+  readonly item: CommunicationItem;
+  readonly caseActive?: boolean;
+  readonly linkLoading?: boolean;
+  readonly onToggleLink?: (messageId: string, linked: boolean) => void;
 }
 
 function CommunicationRow({ item, caseActive, linkLoading, onToggleLink }: CommunicationRowProps) {
@@ -225,8 +225,8 @@ function Timeline({
   openedAt,
   nextAction,
 }: {
-  openedAt: number;
-  nextAction?: keyof typeof NEXT_ACTION_DAY;
+  readonly openedAt: number;
+  readonly nextAction?: keyof typeof NEXT_ACTION_DAY;
 }) {
   const days = (Date.now() - openedAt) / DAY_MS;
   const progress = Math.min(100, (days / ESCALATE_AFTER_DAYS) * 100);

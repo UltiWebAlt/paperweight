@@ -4,11 +4,11 @@ import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { formatUtcStrictDate } from "@shared/formatting";
 
 export interface TrendChartProps {
-  title: string;
-  description?: string;
-  height?: number;
-  trendDirection?: "down" | "up";
-  trend: ChartTrend;
+  readonly title: string;
+  readonly description?: string;
+  readonly height?: number;
+  readonly trendDirection?: "down" | "up";
+  readonly trend: ChartTrend;
 }
 
 export default function TrendChart({
@@ -31,11 +31,9 @@ export default function TrendChart({
       ? "— same"
       : `${t.direction === "down" ? "↓" : "↑"} ${t.pct}% vs prior`;
 
-  const badgeClass = (() => {
-    if (t.direction === "flat") return "badge-ghost";
-    const isGood = t.direction === trendDirection;
-    return isGood ? "badge-success" : "badge-error";
-  })();
+  const badgeClass = t.direction === "flat"
+    ? "badge-ghost"
+    : t.direction === trendDirection ? "badge-success" : "badge-error";
 
   return (
     <div className="card bg-base-200">

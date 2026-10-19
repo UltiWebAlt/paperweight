@@ -16,7 +16,7 @@ export const metadata = buildMetadata({
 });
 
 interface GdprGeneratorPageProps {
-  searchParams: Promise<{
+  readonly searchParams: Promise<{
     company?: string;
     action?: string;
   }>;

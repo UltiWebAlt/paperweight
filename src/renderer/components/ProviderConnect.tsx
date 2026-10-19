@@ -22,10 +22,10 @@ function OAuthSelectRow({
   copyAriaLabel,
   onConnect,
 }: {
-  logo: JSX.Element;
-  label: string;
-  copyAriaLabel: string;
-  onConnect: (copy: boolean) => void;
+  readonly logo: JSX.Element;
+  readonly label: string;
+  readonly copyAriaLabel: string;
+  readonly onConnect: (copy: boolean) => void;
 }): JSX.Element {
   return (
     <div className="join w-full">
@@ -55,11 +55,11 @@ export function ProviderSelect({
   onProton,
   onImap,
 }: {
-  onGmail: (copy: boolean) => void;
-  onMicrosoft: (copy: boolean) => void;
-  onApple: () => void;
-  onProton: () => void;
-  onImap: () => void;
+  readonly onGmail: (copy: boolean) => void;
+  readonly onMicrosoft: (copy: boolean) => void;
+  readonly onApple: () => void;
+  readonly onProton: () => void;
+  readonly onImap: () => void;
 }): JSX.Element {
   return (
     <div className="space-y-4">
@@ -120,11 +120,11 @@ function OAuthConnect({
   onSuccess,
   onBack,
 }: {
-  providerName: string;
-  startAuth: (openInBrowser: boolean) => Promise<{ success: boolean; error?: string }>;
-  copyFirst: boolean;
-  onSuccess: () => void;
-  onBack: () => void;
+  readonly providerName: string;
+  readonly startAuth: (openInBrowser: boolean) => Promise<{ success: boolean; error?: string }>;
+  readonly copyFirst: boolean;
+  readonly onSuccess: () => void;
+  readonly onBack: () => void;
 }): JSX.Element {
   const [step, setStep] = useState<"authorizing" | "success" | "error">(
     "authorizing",
@@ -284,10 +284,10 @@ export function GmailConnect({
   onBack,
   copyFirst = false,
 }: {
-  intent: AccountAuthIntent;
-  onSuccess: () => void;
-  onBack: () => void;
-  copyFirst?: boolean;
+  readonly intent: AccountAuthIntent;
+  readonly onSuccess: () => void;
+  readonly onBack: () => void;
+  readonly copyFirst?: boolean;
 }): JSX.Element {
   return (
     <OAuthConnect
@@ -308,10 +308,10 @@ export function MicrosoftConnect({
   onBack,
   copyFirst = false,
 }: {
-  intent: AccountAuthIntent;
-  onSuccess: () => void;
-  onBack: () => void;
-  copyFirst?: boolean;
+  readonly intent: AccountAuthIntent;
+  readonly onSuccess: () => void;
+  readonly onBack: () => void;
+  readonly copyFirst?: boolean;
 }): JSX.Element {
   return (
     <OAuthConnect
@@ -335,13 +335,13 @@ export function ServerRow({
   onPort,
   onTls,
 }: {
-  label: string;
-  host: string;
-  port: number;
-  tls: boolean;
-  onHost: (v: string) => void;
-  onPort: (v: number) => void;
-  onTls: (v: boolean) => void;
+  readonly label: string;
+  readonly host: string;
+  readonly port: number;
+  readonly tls: boolean;
+  readonly onHost: (v: string) => void;
+  readonly onPort: (v: number) => void;
+  readonly onTls: (v: boolean) => void;
 }): JSX.Element {
   return (
     <div>
@@ -362,7 +362,7 @@ export function ServerRow({
           className="input input-bordered input-sm w-20"
           placeholder="Port"
           value={port}
-          onChange={(e) => onPort(parseInt(e.target.value, 10))}
+          onChange={(e) => onPort(Number.parseInt(e.target.value, 10))}
           required
         />
         <label
@@ -388,8 +388,8 @@ export function AppleConnect({
   onSuccess,
   onBack,
 }: {
-  onSuccess: () => void;
-  onBack: () => void;
+  readonly onSuccess: () => void;
+  readonly onBack: () => void;
 }): JSX.Element {
   const preset = findPresetById("apple")!;
   const [host, setHost] = useState(preset.imap.host);
@@ -542,8 +542,8 @@ export function ProtonConnect({
   onSuccess,
   onBack,
 }: {
-  onSuccess: () => void;
-  onBack: () => void;
+  readonly onSuccess: () => void;
+  readonly onBack: () => void;
 }): JSX.Element {
   const preset = findPresetById("proton")!;
   const [host, setHost] = useState(preset.imap.host);
@@ -706,8 +706,8 @@ export function ImapConnect({
   onSuccess,
   onBack,
 }: {
-  onSuccess: () => void;
-  onBack: () => void;
+  readonly onSuccess: () => void;
+  readonly onBack: () => void;
 }): JSX.Element {
   const [presetId, setPresetId] = useState("custom");
   const [host, setHost] = useState("");

@@ -13,9 +13,9 @@ export function CaseListRow({
   primary,
   onOpen,
 }: {
-  item: GdprCaseSummary;
-  primary: string;
-  onOpen: () => void;
+  readonly item: GdprCaseSummary;
+  readonly primary: string;
+  readonly onOpen: () => void;
 }): JSX.Element {
   return (
     <div className="card bg-base-200 overflow-visible rounded-2xl">

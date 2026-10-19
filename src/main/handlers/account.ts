@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain } from "electron";
-import { readFileSync, existsSync, unlinkSync } from "fs";
-import { join } from "path";
+import { readFileSync, existsSync, unlinkSync } from "node:fs";
+import { join } from "node:path";
 import { IPC } from "@shared/ipc";
 import { isIntInRange, isString } from "@shared/validation";
 import type { ImapConfig, ServerConfig, SupportInfo, MessageType } from "@shared/types";
@@ -46,7 +46,7 @@ import { wipeDatabase, deleteDbFiles, reconnectDb } from "../db";
 import { wipeGlobalDatabase } from "../globalDb";
 import { dataLog, actionLog } from "../utils/log";
 import { getFileLogPath } from "../utils/file-log";
-import os from "os";
+import os from "node:os";
 import { readAccountHealth } from "../services/accountHealth";
 
 type ServerConfigInput = ServerConfig & { smtp: NonNullable<ServerConfig["smtp"]> };

@@ -22,9 +22,9 @@
  */
 
 import Database from "better-sqlite3";
-import { mkdirSync, unlinkSync, existsSync, readFileSync, writeFileSync } from "fs";
-import { join, resolve } from "path";
-import { fileURLToPath } from "url";
+import { mkdirSync, unlinkSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { EU_DPAS, NON_EU_DPAS } from "../src/shared/gdpr/resolution.js";
 
 const __dirname = join(fileURLToPath(import.meta.url), "..");

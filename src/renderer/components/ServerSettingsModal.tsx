@@ -8,10 +8,10 @@ export default function ServerSettingsModal({
   onClose,
   onSaved,
 }: {
-  email: string;
-  initial: ServerConfig;
-  onClose: () => void;
-  onSaved: () => void;
+  readonly email: string;
+  readonly initial: ServerConfig;
+  readonly onClose: () => void;
+  readonly onSaved: () => void;
 }): JSX.Element {
   const [host, setHost] = useState(initial.imap.host);
   const [port, setPort] = useState(initial.imap.port);

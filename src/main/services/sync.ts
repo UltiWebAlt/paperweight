@@ -49,7 +49,7 @@ import {
 // Limits historical sync depth for development (e.g. HISTORICAL_SYNC_DAYS=180).
 // Absent in production = full mailbox sync back to HISTORICAL_FLOOR_DATE.
 const HISTORICAL_SYNC_DAYS = process.env.HISTORICAL_SYNC_DAYS
-  ? parseInt(process.env.HISTORICAL_SYNC_DAYS, 10)
+  ? Number.parseInt(process.env.HISTORICAL_SYNC_DAYS, 10)
   : undefined;
 
 const HISTORICAL_CHUNK_DAYS = 90;

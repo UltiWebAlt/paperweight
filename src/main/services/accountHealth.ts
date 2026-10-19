@@ -1,6 +1,6 @@
 import Database from "better-sqlite3";
 import { app } from "electron";
-import { join } from "path";
+import { join } from "node:path";
 import { emailToFileKey } from "../credentials";
 import type { AccountHealth, SyncStatus } from "@shared/types";
 
@@ -21,8 +21,14 @@ export function readAccountHealth(email: string, status: SyncStatus, hasCredenti
   } finally {
     db?.close();
   }
+  let connection: AccountHealth["connection"];
+  if (!hasCredentials) connection = "missing";
+  else if (status.error) connection = "error";
+  else if (status.running) connection = "syncing";
+  else connection = "ready";
+
   return {
     email, lastSyncAt, historyAvailable: historyAvailable || lastSyncAt !== undefined,
-    connection: !hasCredentials ? "missing" : status.error ? "error" : status.running ? "syncing" : "ready",
+    connection,
   };
 }

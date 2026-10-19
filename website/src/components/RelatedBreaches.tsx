@@ -2,7 +2,7 @@ import Link from "next/link";
 import { type BreachIndexItem, formatCount } from "@/utils/breach";
 
 interface RelatedBreachesProps {
-  breaches: BreachIndexItem[];
+  readonly breaches: BreachIndexItem[];
 }
 
 export function RelatedBreaches({ breaches }: RelatedBreachesProps) {

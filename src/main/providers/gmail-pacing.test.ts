@@ -1,7 +1,7 @@
 import Database from "better-sqlite3";
-import { mkdtempSync, rmSync } from "fs";
-import { tmpdir } from "os";
-import { join } from "path";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { createGmailPacingStore } from "./gmail-pacing";
 
 test("independent connections share pacing, preserve cooldown and survive reopening", () => {

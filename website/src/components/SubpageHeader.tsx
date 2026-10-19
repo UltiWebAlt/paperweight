@@ -1,6 +1,6 @@
 interface SubpageHeaderProps {
-  label?: string;
-  title: string;
+  readonly label?: string;
+  readonly title: string;
 }
 
 export function SubpageHeader({

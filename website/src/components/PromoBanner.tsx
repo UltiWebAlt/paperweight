@@ -2,14 +2,14 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 
 interface PromoBannerProps {
-  icon: ReactNode;
-  title: string;
-  description: string;
-  href?: string;
-  actionLabel?: string;
-  actionClassName?: string;
-  className?: string;
-  children?: ReactNode;
+  readonly icon: ReactNode;
+  readonly title: string;
+  readonly description: string;
+  readonly href?: string;
+  readonly actionLabel?: string;
+  readonly actionClassName?: string;
+  readonly className?: string;
+  readonly children?: ReactNode;
 }
 
 export function PromoBanner(props: PromoBannerProps) {

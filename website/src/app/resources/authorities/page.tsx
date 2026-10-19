@@ -13,10 +13,10 @@ export const metadata = buildMetadata({
 });
 
 interface InfoRowProps {
-  label: string;
-  value: React.ReactNode;
-  valueClassName?: string;
-  valueTitle?: string;
+  readonly label: string;
+  readonly value: React.ReactNode;
+  readonly valueClassName?: string;
+  readonly valueTitle?: string;
 }
 
 function InfoRow({ label, value, valueClassName, valueTitle }: InfoRowProps) {
@@ -36,7 +36,7 @@ function InfoRow({ label, value, valueClassName, valueTitle }: InfoRowProps) {
 }
 
 interface DpaCardProps {
-  dpa: Dpa;
+  readonly dpa: Dpa;
 }
 
 function DpaCard({ dpa }: DpaCardProps) {

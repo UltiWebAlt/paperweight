@@ -1,7 +1,7 @@
 import { BrowserWindow, app } from "electron";
 import { is } from "@electron-toolkit/utils";
-import { existsSync } from "fs";
-import { join } from "path";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { Worker } from "node:worker_threads";
 import { IPC } from "@shared/ipc";
 import {

@@ -55,12 +55,12 @@ interface BatchState {
 // ---------- filter group ----------
 
 interface FilterGroupProps {
-  label: string;
-  options: string[];
-  labels: string[];
-  value: string;
-  onChange: (val: string) => void;
-  colors?: string[];
+  readonly label: string;
+  readonly options: string[];
+  readonly labels: string[];
+  readonly value: string;
+  readonly onChange: (val: string) => void;
+  readonly colors?: string[];
 }
 
 function FilterGroup({ label, options, labels, value, onChange, colors }: FilterGroupProps) {

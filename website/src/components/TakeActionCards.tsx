@@ -2,8 +2,8 @@ import { Download, Shield } from "lucide-react";
 import { ActionCard } from "@/components/ActionCard";
 
 interface TakeActionCardsProps {
-  title?: string;
-  company?: string;
+  readonly title?: string;
+  readonly company?: string;
 }
 
 function buildGdprGeneratorHref(company?: string) {

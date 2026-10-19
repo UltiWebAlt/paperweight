@@ -2,24 +2,24 @@ import { useEffect, useRef, useState } from "react";
 import { Copy } from "lucide-react";
 
 interface ActionModalProps {
-  isOpen: boolean;
-  title: string;
-  children: React.ReactNode;
+  readonly isOpen: boolean;
+  readonly title: string;
+  readonly children: React.ReactNode;
   /** Primary action label. Omit to hide the primary button. */
-  confirmLabel?: string;
-  cancelLabel?: string;
+  readonly confirmLabel?: string;
+  readonly cancelLabel?: string;
   /** Optional middle button (e.g. "No, mark as spam") */
-  secondaryLabel?: string;
-  confirmVariant?: "primary" | "neutral" | "error" | "warning" | "success";
-  secondaryVariant?: "primary" | "neutral" | "error" | "warning" | "success";
-  onConfirm?: () => void | Promise<void>;
-  onSecondary?: () => void | Promise<void>;
-  onCancel: () => void;
-  loading?: boolean;
+  readonly secondaryLabel?: string;
+  readonly confirmVariant?: "primary" | "neutral" | "error" | "warning" | "success";
+  readonly secondaryVariant?: "primary" | "neutral" | "error" | "warning" | "success";
+  readonly onConfirm?: () => void | Promise<void>;
+  readonly onSecondary?: () => void | Promise<void>;
+  readonly onCancel: () => void;
+  readonly loading?: boolean;
   /** When set, shows a copy-to-clipboard button beside Cancel. */
-  copyText?: string;
+  readonly copyText?: string;
   /** When set, shows an error message below the modal body. */
-  error?: string;
+  readonly error?: string;
 }
 
 const VARIANT_CLASS: Record<string, string> = {

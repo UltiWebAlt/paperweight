@@ -18,9 +18,9 @@ interface NavLink {
 }
 
 interface LayoutSelectorProps extends PropsWithChildren {
-  featureNavLinks: NavLink[];
-  guideNavLinks: NavLink[];
-  resourceNavLinks: NavLink[];
+  readonly featureNavLinks: NavLink[];
+  readonly guideNavLinks: NavLink[];
+  readonly resourceNavLinks: NavLink[];
 }
 
 export function LayoutSelector(props: LayoutSelectorProps) {

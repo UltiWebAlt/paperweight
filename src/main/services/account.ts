@@ -1,4 +1,4 @@
-import { join } from "path";
+import { join } from "node:path";
 import {
   loadCredentials,
   saveCredentials,
@@ -79,7 +79,7 @@ function recordAccount(email: string, providerType: string): void {
   const isNewAccount = !existingAccounts.find((a) => a.email === email);
 
   const now = Date.now();
-  const registeredAt = isNewAccount ? now : (parseInt(getSetting("registeredAt") || "0", 10) || now);
+  const registeredAt = isNewAccount ? now : (Number.parseInt(getSetting("registeredAt") || "0", 10) || now);
 
   registerAccount(email, providerType, registeredAt);
 
@@ -365,7 +365,7 @@ export function getAccountInfo(): AccountInfo {
   return {
     email: getSetting("accountEmail") || "",
     providerType: creds?.providerType || "none",
-    registeredAt: parseInt(getSetting("registeredAt") || "0", 10) || undefined,
+    registeredAt: Number.parseInt(getSetting("registeredAt") || "0", 10) || undefined,
     lastSyncAt: syncState.last_sync_at,
     totalMessages: stats.totalMessages,
     server,

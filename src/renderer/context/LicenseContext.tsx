@@ -22,8 +22,8 @@ export function LicenseProvider({
   initialLicense,
   children,
 }: {
-  initialLicense: LicenseStatus;
-  children: React.ReactNode;
+  readonly initialLicense: LicenseStatus;
+  readonly children: React.ReactNode;
 }): JSX.Element {
   const [license, setLicense] = useState<LicenseStatus>(initialLicense);
 

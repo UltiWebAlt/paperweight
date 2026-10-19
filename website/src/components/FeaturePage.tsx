@@ -27,13 +27,13 @@ export interface RelatedFeatureItem {
 }
 
 interface FeatureHeroProps {
-  eyebrow: string;
-  title: string;
-  description: string;
-  imageSrc: string;
-  imageAlt: string;
-  imageWidth: number;
-  imageHeight: number;
+  readonly eyebrow: string;
+  readonly title: string;
+  readonly description: string;
+  readonly imageSrc: string;
+  readonly imageAlt: string;
+  readonly imageWidth: number;
+  readonly imageHeight: number;
 }
 
 export function FeatureHero(props: FeatureHeroProps) {
@@ -72,9 +72,9 @@ export function FeatureHero(props: FeatureHeroProps) {
 }
 
 interface FeatureWorkflowProps {
-  heading: string;
-  description?: string;
-  steps: WorkflowStep[];
+  readonly heading: string;
+  readonly description?: string;
+  readonly steps: WorkflowStep[];
 }
 
 export function FeatureWorkflow({
@@ -115,9 +115,9 @@ export function FeatureWorkflow({
 }
 
 interface RelatedFeaturesProps {
-  heading: string;
-  description?: string;
-  items: RelatedFeatureItem[];
+  readonly heading: string;
+  readonly description?: string;
+  readonly items: RelatedFeatureItem[];
 }
 
 export function RelatedFeatures({
@@ -243,7 +243,7 @@ export function FeatureTrustSummary() {
 }
 
 interface FeatureFaqProps {
-  items: FaqItem[];
+  readonly items: FaqItem[];
 }
 
 export function FeatureFaq({ items }: FeatureFaqProps) {
@@ -280,10 +280,10 @@ interface FeatureCtaAction {
 }
 
 interface FeatureFinalCtaProps {
-  heading: string;
-  body: string;
-  primaryAction: FeatureCtaAction;
-  secondaryAction: FeatureCtaAction;
+  readonly heading: string;
+  readonly body: string;
+  readonly primaryAction: FeatureCtaAction;
+  readonly secondaryAction: FeatureCtaAction;
 }
 
 export function FeatureFinalCta(props: FeatureFinalCtaProps) {

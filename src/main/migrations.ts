@@ -1,5 +1,5 @@
-import { join } from "path";
-import { existsSync, unlinkSync } from "fs";
+import { join } from "node:path";
+import { existsSync, unlinkSync } from "node:fs";
 import Database from "better-sqlite3";
 import { APP_CONFIG } from "@shared/config";
 import { findPresetByHost } from "@shared/email-providers";

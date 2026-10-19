@@ -1,7 +1,7 @@
 import { app } from "electron";
 import { is } from "@electron-toolkit/utils";
-import { statSync, readdirSync } from "fs";
-import { dirname, join } from "path";
+import { statSync, readdirSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { listAccounts, emailToFileKey } from "../credentials";
 import type { StorageAccount, StorageBreakdown } from "@shared/types";
 

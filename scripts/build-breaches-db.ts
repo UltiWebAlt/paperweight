@@ -9,9 +9,9 @@
  */
 
 import Database from "better-sqlite3";
-import { mkdirSync, unlinkSync, existsSync } from "fs";
-import { join, resolve } from "path";
-import { fileURLToPath } from "url";
+import { mkdirSync, unlinkSync, existsSync } from "node:fs";
+import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = join(fileURLToPath(import.meta.url), "..");
 const ROOT = resolve(__dirname, "..");
@@ -37,7 +37,7 @@ interface HibpBreach {
 
 function escSql(str: string | null | undefined): string {
   if (str == null) return "NULL";
-  return "'" + String(str).replace(/'/g, "''") + "'";
+  return "'" + String(str).replaceAll("'", "''") + "'";
 }
 
 async function main() {
